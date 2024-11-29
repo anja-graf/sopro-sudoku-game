@@ -1,0 +1,110 @@
+class Sudoku(object):
+    """ Represents the players' sudoku field """
+
+    def __init__(self, size: int = 9):
+        """ Initializes objects of sudoku class with default size of 9 fields as height and width.
+        Each field has a grid which is per default 3x3 """
+        self.size = size
+        self.grid = size ** (1/2)
+        if int(self.grid) ** 2 != self.size:
+            raise ValueError(
+                "This size can not be taken as a valid sudoku size, because it is not a square number!")
+
+        # filling with some values, later the create function should be called
+        self.values = [[x for x in range(1, size + 1)]
+                       for i in range(1, size + 1)]
+
+    def create(self, difficulty):
+        """ Generates a new sudoku that is solvable and has some empty entries depending on difficulty (easy, medium or difficult) """
+        # TODO
+        pass
+
+    def set(self, x: int, y: int, new_value: int):
+        """ Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0 """
+        if self.is_valid_coordinate(x, y) and 0 <= new_value and new_value <= self.size:
+            self.values[x][y] = new_value
+        else:
+            raise Exception(
+                "You are trying to access a value that is outside of the Sudoku field!")
+
+    def is_valid_coordinate(self, x: int, y: int) -> bool:
+        """ Checks if given coordinates x and y lie in a sudoku field """
+        return 1 <= x and x <= self.size and 1 <= y and y <= self.size
+
+    def solve(self):
+        """ Solves complete sudoku game through a backtracking algorithm """
+        # TODO
+        pass
+
+    def is_filled(self):
+        """ Checks if the sudoku field is already completely filled """
+        for row in self.values:
+            # If there is an empty value it is represented as '0'
+            if not all(i != 0 for i in row):
+                return False
+        return True
+
+    def is_valid(self):
+        """ Checks if all sudoku field entries are valid. 
+        According to the rules there must not be any duplicate in every row and column, as well as in each grid"""
+        # Check each row
+        for row in self.values:
+            # Remove empty 0 cells
+            row_without_zero = [item for item in row if item != 0]
+            if len(row_without_zero) != len(set(row_without_zero)):  # Check if there are duplicates
+                return False
+
+        # Check each column
+        for col in range(0, self.size):
+            filled_vals = []
+            for row in self.values:
+                if row[col] != 0 and row[col] in filled_vals:
+                    return False
+                filled_vals.append(row[col])
+
+        # Check each grid
+        # for grid in range(0,self.grid):
+        # TODO
+
+        return True
+
+    def is_solved(self):
+        """ Checks if the sudoku field is completely solved """
+        return self.is_filled() and self.is_valid()
+
+    def remove(self, x: int, y: int):
+        """ Removes an entry in a sudoku field and replaces it by invalid value 0 """
+        self.set(x, y, 0)
+
+    def __str__(self):
+        """ String representation of a sudoku field as a formatted matrix """
+        rep = ""
+        for i in range(0, self.size):
+            # After every row of self.grid many fields there is a horizontal line
+            if i % self.grid == 0:
+                rep += " - " * self.size + "\n"
+
+            for j in range(0, self.size):
+                # After every column of self.grid many fields there is a vertical line
+                if j % self.grid == 0:
+                    rep += "|"
+
+                if self.values[i][j] == 0:
+                    # Zero represents an empty value
+                    rep += "   "
+                else:
+                    # Actual number values of the sudoku field
+                    rep += " " + str(self.values[i][j]) + " "
+            rep += "|\n"
+        return rep
+
+
+# Some experimental Code to test functions
+
+f = Sudoku(9)
+f.remove(4, 4)
+print(f)
+print(f.is_filled())
+f.set(4, 4, 3)
+print(f.is_filled())
+
