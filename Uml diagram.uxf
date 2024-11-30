@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.1">
+  <zoom_level>11</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>242</x>
+      <y>451</y>
+      <w>275</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>Game
+--
+time_needed
+--
+__init__(size,difficulty)
+start_timer()
+set_player(player: Player)
+finish_game()
+is_finished()
+step(players_input) -&gt; bool 
+get_current_state()
+run()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>803</x>
+      <y>231</y>
+      <w>275</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>Player
+--
+name
+password
+highscore
+--
+__init__(name)
+add_password(password)
+log_in(name,password)
+update_highscore(new_highscore)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>682</x>
+      <y>462</y>
+      <w>341</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>UserInterface
+--
+--
+__init__()
+give_instruction( filename)
+load_highscore(filename)
+add_highscore(name, score, scores)
+save_highscore(scores, filename)
+display()
+frame()
+wait_for_input()
+read_input()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>836</x>
+      <y>396</y>
+      <w>33</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>506</x>
+      <y>583</y>
+      <w>198</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;160.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>407</x>
+      <y>330</y>
+      <w>33</w>
+      <h>143</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;110.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>242</y>
+      <w>297</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>Persistence
+--
+highscore
+--
+_save_game(game, filename)_
+_load_game(cls, filename) -&gt; Game_
+_load_highscore(player, filename)_
+_add_highscore(player,filename,score)_
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>99</x>
+      <y>385</y>
+      <w>165</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>130.0;80.0;10.0;80.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>484</x>
+      <y>363</y>
+      <w>341</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0;290.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>352</x>
+      <y>55</y>
+      <w>286</w>
+      <h>286</h>
+    </coordinates>
+    <panel_attributes>Sudoku
+--
+values
+size
+grid
+--
+__init__(size)
+create(difficulty)
+set(x,y,new_value)
+is_valid_coordinate(x,y) -&gt; bool
+solve()
+is_filled() -&gt; bool
+is_valid() -&gt; bool
+is_solved() -&gt; bool
+remove(x,y)
+__str__() -&gt; str
+
+get_a_hint(self)
+show_wrong_fields(self)
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
