@@ -4,8 +4,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>242</x>
-      <y>451</y>
+      <x>792</x>
+      <y>638</y>
       <w>275</w>
       <h>220</h>
     </coordinates>
@@ -26,8 +26,8 @@ run()</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>803</x>
-      <y>231</y>
+      <x>1353</x>
+      <y>418</y>
       <w>275</w>
       <h>176</h>
     </coordinates>
@@ -47,30 +47,31 @@ update_highscore(new_highscore)
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>682</x>
-      <y>462</y>
+      <x>1232</x>
+      <y>649</y>
       <w>341</w>
-      <h>220</h>
+      <h>154</h>
     </coordinates>
     <panel_attributes>UserInterface
 --
 --
 __init__()
 give_instruction( filename)
-load_highscore(filename)
-add_highscore(name, score, scores)
-save_highscore(scores, filename)
 display()
 frame()
 wait_for_input()
-read_input()</panel_attributes>
+read_input()
+
+load_highscore(filename)
+add_highscore(name, score, scores)
+save_highscore(scores, filename)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>836</x>
-      <y>396</y>
+      <x>1386</x>
+      <y>583</y>
       <w>33</w>
       <h>88</h>
     </coordinates>
@@ -80,8 +81,8 @@ read_input()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>506</x>
-      <y>583</y>
+      <x>1056</x>
+      <y>770</y>
       <w>198</w>
       <h>33</h>
     </coordinates>
@@ -91,19 +92,19 @@ read_input()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>407</x>
-      <y>330</y>
+      <x>957</x>
+      <y>528</y>
       <w>33</w>
-      <h>143</h>
+      <h>132</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
-    <additional_attributes>10.0;110.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;100.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>242</y>
+      <x>550</x>
+      <y>429</y>
       <w>297</w>
       <h>154</h>
     </coordinates>
@@ -114,15 +115,15 @@ highscore
 _save_game(game, filename)_
 _load_game(cls, filename) -&gt; Game_
 _load_highscore(player, filename)_
-_add_highscore(player,filename,score)_
+_save_highscore(player,filename,score)_
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>99</x>
-      <y>385</y>
+      <x>649</x>
+      <y>572</y>
       <w>165</w>
       <h>110</h>
     </coordinates>
@@ -132,8 +133,8 @@ _add_highscore(player,filename,score)_
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>484</x>
-      <y>363</y>
+      <x>1034</x>
+      <y>550</y>
       <w>341</w>
       <h>110</h>
     </coordinates>
@@ -143,16 +144,17 @@ _add_highscore(player,filename,score)_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>352</x>
-      <y>55</y>
+      <x>902</x>
+      <y>198</y>
       <w>286</w>
-      <h>286</h>
+      <h>341</h>
     </coordinates>
     <panel_attributes>Sudoku
 --
 values
-size
-grid
+size {default is 9}
+grid {is square root of size}
+solution
 --
 __init__(size)
 create(difficulty)
@@ -164,11 +166,37 @@ is_valid() -&gt; bool
 is_solved() -&gt; bool
 remove(x,y)
 __str__() -&gt; str
-
 get_a_hint(self)
 show_wrong_fields(self)
 
 </panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1320</x>
+      <y>242</y>
+      <w>143</w>
+      <h>121</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enumeration&gt;&gt;
+Difficulty
+--
+EASY
+MEDIUM
+HARD</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1177</x>
+      <y>264</y>
+      <w>165</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;130.0;10.0</additional_attributes>
   </element>
 </diagram>
