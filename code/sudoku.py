@@ -2,17 +2,26 @@ class Sudoku(object):
     """ Represents the players' sudoku field """
 
     def __init__(self, size: int = 9):
-        """ Initializes objects of sudoku class with default size of 9 fields as height and width.
-        Each field has a grid which is per default 3x3 """
-        self.size = size
-        self.grid = size ** (1/2)
-        if int(self.grid) ** 2 != self.size:
+        """Initializes objects of sudoku class with default size of 9 fields as height and width.
+        Each field has a grid which is per default 3x3"""
+        self.size: int = size
+        temp_grid = size ** (1 / 2)
+        if size < 4:
             raise ValueError(
-                "This size can not be taken as a valid sudoku size, because it is not a square number!")
+                "This size can not be taken as a valid sudoku size, because it is to small!"
+            )
+        if int(temp_grid) ** 2 != self.size:
+            raise ValueError(
+                "This size can not be taken as a valid sudoku size, because it is not a square number!"
+            )
+        self.grid: int = int(temp_grid)
 
-        # filling with some values, later the create function should be called
-        self.values = [[x for x in range(1, size + 1)]
-                       for i in range(1, size + 1)]
+        # filling with some values, later the create function should be called to generate a solvable field
+        self.values: list[list[int]] = [
+            [x for x in range(1, size + 1)] for i in range(1, size + 1)
+        ]
+
+        self.solution: list[list[int]] = []
 
     def create(self, difficulty):
         """ Generates a new sudoku that is solvable and has some empty entries depending on difficulty (easy, medium or difficult) """
