@@ -23,10 +23,37 @@ class Sudoku(object):
 
         self.solution: list[list[int]] = []
 
-    def create(self, difficulty):
-        """ Generates a new sudoku that is solvable and has some empty entries depending on difficulty (easy, medium or difficult) """
-        # TODO
-        pass
+    def create(self, difficulty: Difficulty = ...):
+        """Creates a new sudoku that is solvable and has some empty entries depending on difficulty (easy, medium or hard)
+        The used algorithm can be found in web, e.g. here:
+        https://stackoverflow.com/questions/45471152/how-to-create-a-sudoku-puzzle-in-python
+
+        The Difficulty is being represented as Enum. A suitable call of this function would be 'field.create(Difficulty.MEDIUM)' for example.
+        """
+        self._generate()
+        # TODO remove numbers based on difficulty
+
+    def _generate(self):
+        """Generates new random numbers, so the sudoku field is completely filled and solved"""
+        rows = []
+        for g in self._shuffle():
+            for r in self._shuffle():
+                rows.append(g * self.grid + r)
+        cols = []
+        for g in self._shuffle():
+            for r in self._shuffle():
+                cols.append(g * self.grid + r)
+        nums = self._shuffle(range(1, self.grid * self.grid + 1))
+
+        self.values = []
+        for r in rows:
+            b = []
+            for c in cols:
+                b.append(
+                    nums[(self.grid * (r % self.grid) + r // self.grid + c) % self.size]
+                )
+            self.values.append(b)
+        self.solution = Sudoku._deep_copy(self.values)
 
     def set(self, x: int, y: int, new_value: int):
         """ Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0 """
