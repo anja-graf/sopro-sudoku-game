@@ -9,8 +9,9 @@ class Difficulty(Enum):
     MEDIUM = 2
     HARD = 3
 
+
 class Sudoku(object):
-    """ Represents the players' sudoku field """
+    """Represents the players' sudoku field"""
 
     def __init__(self, size: int = 9):
         """Initializes objects of sudoku class with default size of 9 fields as height and width.
@@ -61,11 +62,12 @@ class Sudoku(object):
             b = []
             for c in cols:
                 b.append(
-                    nums[(self.grid * (r % self.grid) + r // self.grid + c) % self.size]
+                    nums[(self.grid * (r % self.grid) +
+                          r // self.grid + c) % self.size]
                 )
             self.values.append(b)
         self.solution = Sudoku._deep_copy(self.values)
-        
+
     def _shuffle(self, l: Sequence[int] = ...) -> list[int]:
         """Returns a randomized permutation of list input, e.g. [0,1,2] -> [0,2,1]
         If no Sequence Object is given the l parameter will be set to the grid size, which is 3 per default
@@ -90,15 +92,16 @@ class Sudoku(object):
             self.values[p // self.size][p % self.size] = 0
 
     def set(self, x: int, y: int, new_value: int):
-        """ Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0 """
+        """Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0"""
         if self.is_valid_coordinate(x, y) and 0 <= new_value and new_value <= self.size:
             self.values[x][y] = new_value
         else:
             raise Exception(
-                "You are trying to access a value that is outside of the Sudoku field!")
+                "You are trying to access a value that is outside of the Sudoku field!"
+            )
 
     def is_valid_coordinate(self, x: int, y: int) -> bool:
-        """ Checks if given coordinates x and y lie in a sudoku field """
+        """Checks if given coordinates x and y lie in a sudoku field"""
         return 1 <= x and x <= self.size and 1 <= y and y <= self.size
 
     def solve(self):
@@ -129,6 +132,10 @@ class Sudoku(object):
         else:
             raise Exception("Oh no! Seems like this Sudoku is unsolvable :( ")
 
+    def _deep_copy(source: list[list[int]]) -> list[list[int]]:
+        """Returns Deep Copy of two-dimensional list, such as the 'self.values' or 'self.solution' attribute"""
+        return [row[:] for row in source]
+
     def _backtrack_sudoku(self, index) -> bool:
         """Solves complete sudoku game through a backtracking algorithm and returns if the game is solvable.
         But Caution, it is recursive, so 'self.size' should be not more than 36 otherwise the program gets slow!
@@ -148,8 +155,8 @@ class Sudoku(object):
             return False
         return self._backtrack_sudoku(index + 1)
 
-    def is_filled(self):
-        """ Checks if the sudoku field is already completely filled """
+    def is_filled(self) -> bool:
+        """Checks if the sudoku field is already completely filled"""
         for row in self.values:
             # If there is an empty value it is represented as '0'
             if not all(i != 0 for i in row):
@@ -208,23 +215,24 @@ class Sudoku(object):
         # TODO add example
 
         return True
-    
+
     def _is_valid_sudoku_list(l: list) -> bool:
         """A valid sudoku list should not contain duplicates, but empty entries that are represented as 0 are allowed"""
-        l_without_zero = [item for item in l if item != 0]  # Remove empty 0 cells
+        l_without_zero = [item for item in l if item !=
+                          0]  # Remove empty 0 cells
         # Check duplicates
         return len(l_without_zero) == len(set(l_without_zero))
 
-    def is_solved(self):
-        """ Checks if the sudoku field is completely solved """
+    def is_solved(self) -> bool:
+        """Checks if the sudoku field is completely solved"""
         return self.is_filled() and self.is_valid()
 
     def remove(self, x: int, y: int):
-        """ Removes an entry in a sudoku field and replaces it by invalid value 0 """
+        """Removes an entry in a sudoku field and replaces it by invalid value 0"""
         self.set(x, y, 0)
 
-    def __str__(self):
-        """ String representation of a sudoku field as a formatted matrix """
+    def __str__(self) -> LiteralString | str:
+        """String representation of a sudoku field as a formatted matrix"""
         rep = ""
         for i in range(0, self.size):
             # After every row of self.grid many fields there is a horizontal line
@@ -248,10 +256,38 @@ class Sudoku(object):
 
 # Some experimental Code to test functions
 
-f = Sudoku(9)
-f.remove(4, 4)
+f = Sudoku(36)
+f.create(Difficulty.EASY)
 print(f)
-print(f.is_filled())
-f.set(4, 4, 3)
-print(f.is_filled())
+print(f.is_valid())
+temp = Sudoku._deep_copy(f.solution)
+f.solution = []
 
+f.solve()
+f.values = f.solution
+print(f)
+
+
+# f.set(1, 1, 3)
+# f.set(2, 2, 3)
+
+# print(f.is_valid())
+# print(f)
+# print(f.is_filled())
+
+# board = [
+#         [7, 8, 0, 4, 0, 0, 1, 2, 0],
+#         [6, 0, 0, 0, 7, 5, 0, 0, 9],
+#         [0, 0, 0, 6, 0, 1, 0, 7, 8],
+#         [0, 0, 7, 0, 4, 0, 2, 6, 0],
+#         [0, 0, 1, 0, 5, 0, 9, 3, 0],
+#         [9, 0, 4, 0, 6, 0, 0, 0, 5],
+#         [0, 7, 0, 3, 0, 0, 0, 1, 2],
+#         [1, 2, 0, 0, 0, 7, 4, 0, 0],
+#         [0, 4, 9, 2, 0, 6, 0, 0, 7]
+# ]
+# print(f.is_valid())
+# f.values = board
+# print(f)
+# print(f.is_valid())
+# print(f.is_solved())
