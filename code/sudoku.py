@@ -102,9 +102,32 @@ class Sudoku(object):
         return 1 <= x and x <= self.size and 1 <= y and y <= self.size
 
     def solve(self):
-        """ Solves complete sudoku game through a backtracking algorithm """
-        # TODO
-        pass
+        """Returns solution that was created in the 'create()' method after '_generate()' and before '_remove_numbers()',
+        if it exists. Otherwise a backtracking algorithm solves given Sudoku or throws an exception in case the sudoku
+        is not solvable.
+        After calling this method the solution will be saved in the 'self.solution' attribute and the 'self.values'
+        parameter will stay the same.
+        """
+        if self.solution:
+            return
+        if self.is_solved():
+            # The self.values attribute already is a solution, so everything left to do is to copy it to self.solution
+            self.solution = Sudoku._deep_copy(self.values)
+            return
+
+        # Deep Copy of self.values is necessary because it will be used and changed in _backtrack_sudoku() later on
+        temp = Sudoku._deep_copy(self.values)
+
+        if self.size >= 36:
+            raise Exception(
+                "\nHi, it's me your Pc. You are working with such high numbers... \n...that is too strenuous for me! \nFunfact: Already the normal Sudoku field with self.size = 9 has 81! permutations, but a lot of those would not pass my is_valid() method. This is why there are 'only' around 6.67 * 10²¹ possible fields! [https://rp-online.de/panorama/wissen/wie-viele-sudokus-sind-moeglich_aid-17351685]"
+            )
+        if self._backtrack_sudoku(0):
+            self.solution = self.values
+            self.values = temp
+            return
+        else:
+            raise Exception("Oh no! Seems like this Sudoku is unsolvable :( ")
 
     def _backtrack_sudoku(self, index) -> bool:
         """Solves complete sudoku game through a backtracking algorithm and returns if the game is solvable.
