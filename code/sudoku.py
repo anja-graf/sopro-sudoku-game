@@ -1,3 +1,14 @@
+from random import sample
+from enum import Enum
+from collections.abc import Sequence
+from typing import LiteralString
+
+
+class Difficulty(Enum):
+    EASY = 1
+    MEDIUM = 2
+    HARD = 3
+
 class Sudoku(object):
     """ Represents the players' sudoku field """
 
@@ -31,7 +42,7 @@ class Sudoku(object):
         The Difficulty is being represented as Enum. A suitable call of this function would be 'field.create(Difficulty.MEDIUM)' for example.
         """
         self._generate()
-        # TODO remove numbers based on difficulty
+        self._remove_numbers(difficulty)
 
     def _generate(self):
         """Generates new random numbers, so the sudoku field is completely filled and solved"""
@@ -54,6 +65,29 @@ class Sudoku(object):
                 )
             self.values.append(b)
         self.solution = Sudoku._deep_copy(self.values)
+        
+    def _shuffle(self, l: Sequence[int] = ...) -> list[int]:
+        """Returns a randomized permutation of list input, e.g. [0,1,2] -> [0,2,1]
+        If no Sequence Object is given the l parameter will be set to the grid size, which is 3 per default
+        """
+        if l is ...:
+            l = range(self.grid)
+        return sample(l, len(l))
+
+    def _remove_numbers(self, difficulty: Difficulty):
+        """Removes numbers based on given difficulty that can be null.
+        If it is easy around a quarter will be removed, with medium around two quarters and otherwise three quarters.
+        The default difficulty is hard."""
+        squares = self.size**2
+
+        empties = squares * 3 // 4
+        if difficulty is Difficulty.EASY:
+            empties = squares * 1 // 4
+        elif difficulty is Difficulty.MEDIUM:
+            empties = squares * 2 // 4
+
+        for p in sample(range(squares), empties):
+            self.values[p // self.size][p % self.size] = 0
 
     def set(self, x: int, y: int, new_value: int):
         """ Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0 """
