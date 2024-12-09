@@ -114,29 +114,36 @@ class Sudoku(object):
                 return False
         return True
 
-    def is_valid(self):
-        """ Checks if all sudoku field entries are valid. 
-        According to the rules there must not be any duplicate in every row and column, as well as in each grid"""
-        # Check each row
-        for row in self.values:
-            # Remove empty 0 cells
-            row_without_zero = [item for item in row if item != 0]
-            if len(row_without_zero) != len(set(row_without_zero)):  # Check if there are duplicates
-                return False
+    def is_valid(self) -> bool:
+        """Checks if all sudoku field entries are valid.
+        According to the rules there must not be any duplicate in every row and column, as well as in each grid
+        """
+        return (
+            self._is_valid_in_every_row()
+            and self._is_valid_in_every_column()
+            and self._is_valid_in_every_grid()
+        )
 
-        # Check each column
+    def _is_valid_in_every_row(self) -> bool:
+        """Checks if all sudoku field entries are valid in every row"""
+        for row in self.values:
+            if not Sudoku._is_valid_sudoku_list(row):
+                return False
+        return True
+
+    def _is_valid_in_every_column(self) -> bool:
+        """Checks if all sudoku field entries are valid in every column"""
         for col in range(0, self.size):
             filled_vals = []
             for row in self.values:
                 if row[col] != 0 and row[col] in filled_vals:
                     return False
                 filled_vals.append(row[col])
-
-        # Check each grid
-        # for grid in range(0,self.grid):
-        # TODO
-
         return True
+
+    def _is_valid_in_every_grid(self) -> bool:
+        """Checks if all sudoku field entries are valid in every grid"""
+        # TODO implement functionality
 
     def is_solved(self):
         """ Checks if the sudoku field is completely solved """
