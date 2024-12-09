@@ -93,16 +93,23 @@ class Sudoku(object):
 
     def set(self, x: int, y: int, new_value: int):
         """Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0"""
-        if self.is_valid_coordinate(x, y) and 0 <= new_value and new_value <= self.size:
+        if self.is_valid_coordinate(x, y) and self.is_valid_value(new_value):
             self.values[x][y] = new_value
         else:
             raise Exception(
                 "You are trying to access a value that is outside of the Sudoku field!"
             )
 
+    def is_empty(values: list[list[int]], x: int, y: int) -> bool:
+        ''' Checks if entry of given coordinates x and y is empty '''
+        return values[x][y] == 0
+
+    def is_valid_value(self, value: int):
+        return 0 <= value and value <= self.size
+
     def is_valid_coordinate(self, x: int, y: int) -> bool:
         """Checks if given coordinates x and y lie in a sudoku field"""
-        return 1 <= x and x <= self.size and 1 <= y and y <= self.size
+        return 0 <= x and x < self.size and 0 <= y and y < self.size
 
     def solve(self):
         """Returns solution that was created in the 'create()' method after '_generate()' and before '_remove_numbers()',
@@ -256,16 +263,16 @@ class Sudoku(object):
 
 # Some experimental Code to test functions
 
-f = Sudoku(36)
-f.create(Difficulty.EASY)
-print(f)
-print(f.is_valid())
-temp = Sudoku._deep_copy(f.solution)
-f.solution = []
+# f = Sudoku(36)
+# f.create(Difficulty.EASY)
+# print(f)
+# print(f.is_valid())
+# temp = Sudoku._deep_copy(f.solution)
+# f.solution = []
 
-f.solve()
-f.values = f.solution
-print(f)
+# f.solve()
+# f.values = f.solution
+# print(f)
 
 
 # f.set(1, 1, 3)
