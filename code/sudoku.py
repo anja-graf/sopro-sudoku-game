@@ -166,6 +166,12 @@ class Sudoku(object):
         # TODO add example
 
         return True
+    
+    def _is_valid_sudoku_list(l: list) -> bool:
+        """A valid sudoku list should not contain duplicates, but empty entries that are represented as 0 are allowed"""
+        l_without_zero = [item for item in l if item != 0]  # Remove empty 0 cells
+        # Check duplicates
+        return len(l_without_zero) == len(set(l_without_zero))
 
     def is_solved(self):
         """ Checks if the sudoku field is completely solved """
