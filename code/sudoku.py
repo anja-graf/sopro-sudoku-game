@@ -143,7 +143,29 @@ class Sudoku(object):
 
     def _is_valid_in_every_grid(self) -> bool:
         """Checks if all sudoku field entries are valid in every grid"""
-        # TODO implement functionality
+        grids = []
+        for row in self.values:
+            for j in range(0, self.grid):
+                test = []
+                for i in range(0, self.grid):
+                    test.append(row[i + self.grid * j])
+                grids.append(test)
+        new = {}
+        i = 0
+        for el in range(0, self.size * self.grid):
+            if el % self.size == 0 and el != 0:
+                i += self.grid
+            if (el % self.grid) + i not in new:
+                new[(el % self.grid) + i] = grids[el]
+            else:
+                new[(el % self.grid) + i].extend(grids[el])
+
+        for val in new.values():
+            if not Sudoku._is_valid_sudoku_list(val):
+                return False
+        # TODO add example
+
+        return True
 
     def is_solved(self):
         """ Checks if the sudoku field is completely solved """
