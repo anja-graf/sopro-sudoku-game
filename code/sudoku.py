@@ -106,6 +106,25 @@ class Sudoku(object):
         # TODO
         pass
 
+    def _backtrack_sudoku(self, index) -> bool:
+        """Solves complete sudoku game through a backtracking algorithm and returns if the game is solvable.
+        But Caution, it is recursive, so 'self.size' should be not more than 36 otherwise the program gets slow!
+        """
+        if index == self.size * self.size:
+            return self.is_solved()
+        row = index // self.size
+        col = index % self.size
+        if self.values[row][col] == 0:
+            # print(index // self.size,index % self.size)
+            for j in range(1, self.size + 1):
+                self.values[row][col] = j
+                # print(self)
+                if self.is_valid() and self._backtrack_sudoku(index + 1):
+                    return True
+                self.values[row][col] = 0
+            return False
+        return self._backtrack_sudoku(index + 1)
+
     def is_filled(self):
         """ Checks if the sudoku field is already completely filled """
         for row in self.values:
