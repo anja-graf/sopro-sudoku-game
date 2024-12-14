@@ -5,17 +5,58 @@ from typing import LiteralString
 
 
 class Difficulty(Enum):
+    """Represents Difficulties that can be chosen from while creating a new Sudoku game
+
+    >>> Difficulty.EASY
+    <Difficulty.EASY: 1>
+
+    >>> Difficulty.MEDIUM
+    <Difficulty.MEDIUM: 2>
+
+    >>> Difficulty.HARD
+    <Difficulty.HARD: 3>
+
+    """
+
     EASY = 1
     MEDIUM = 2
     HARD = 3
 
 
 class Sudoku(object):
-    """Represents the players' sudoku field"""
+    """Represents the players' sudoku field
+
+    >>> s = Sudoku(size=9)
+    >>> s.create(difficulty=Difficulty.EASY)
+    >>> s.is_valid()
+    True
+    >>> s.is_filled()
+    False
+    >>> value = s.values[0][0]
+    >>> s.remove(0,0)
+    >>> Sudoku.is_empty(s.values,0,0)
+    True
+    >>> s.set(0,0,value)
+    >>> s.solve()
+    >>> s.values = s.solution
+    >>> s.is_solved()
+    True
+    """
 
     def __init__(self, size: int = 9):
         """Initializes objects of sudoku class with default size of 9 fields as height and width.
-        Each field has a grid which is per default 3x3"""
+        Each field has a grid which is per default 3x3
+
+        >>> s = Sudoku(5) # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        ValueError: This size can not be taken as a valid sudoku size, because it is not a square number!
+
+        >>> s = Sudoku(-1) # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        ValueError: This size can not be taken as a valid sudoku size, because it is to small!
+        """
         self.size: int = size
         temp_grid = size ** (1 / 2)
         if size < 4:
@@ -41,12 +82,31 @@ class Sudoku(object):
         https://stackoverflow.com/questions/45471152/how-to-create-a-sudoku-puzzle-in-python
 
         The Difficulty is being represented as Enum. A suitable call of this function would be 'field.create(Difficulty.MEDIUM)' for example.
+
+        >>> s = Sudoku(size=9)
+        >>> s.create(difficulty=Difficulty.HARD)
+        >>> s.values != []
+        True
+        >>> s.is_valid()
+        True
+        >>> s.solution != []
+        True
         """
         self._generate()
         self._remove_numbers(difficulty)
 
     def _generate(self):
-        """Generates new random numbers, so the sudoku field is completely filled and solved"""
+        """Generates new random numbers, so the sudoku field is completely filled and solved
+
+        >>> s = Sudoku(size=9)
+        >>> s._generate()
+        >>> s.values != []
+        True
+        >>> s.is_solved()
+        True
+        >>> s.solution == s.values
+        True
+        """
         rows = []
         for g in self._shuffle():
             for r in self._shuffle():
@@ -71,6 +131,12 @@ class Sudoku(object):
     def _shuffle(self, l: Sequence[int] = ...) -> list[int]:
         """Returns a randomized permutation of list input, e.g. [0,1,2] -> [0,2,1]
         If no Sequence Object is given the l parameter will be set to the grid size, which is 3 per default
+
+        >>> s = Sudoku(size=9)
+        >>> x = s._shuffle()
+        >>> x in [[0,1,2],[0,2,1],[1,2,0],[1,0,2],[2,0,1],[2,1,0]]
+        True
+
         """
         if l is ...:
             l = range(self.grid)
@@ -79,7 +145,16 @@ class Sudoku(object):
     def _remove_numbers(self, difficulty: Difficulty):
         """Removes numbers based on given difficulty that can be null.
         If it is easy around a quarter will be removed, with medium around two quarters and otherwise three quarters.
-        The default difficulty is hard."""
+        The default difficulty is hard.
+
+        >>> s = Sudoku(size=9)
+        >>> s._generate()
+        >>> s._remove_numbers(Difficulty.EASY)
+        >>> s.is_solved()
+        False
+        >>> s.solution != s.values
+        True
+        """
         squares = self.size**2
 
         empties = squares * 3 // 4
@@ -92,23 +167,57 @@ class Sudoku(object):
             self.values[p // self.size][p % self.size] = 0
 
     def set(self, x: int, y: int, new_value: int):
-        """Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0"""
+        """Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0
+
+        >>> s = Sudoku(size=9)
+        >>> s.set(1,1,10) # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        Exception: You are trying to set an invalid value or one that is outside of the Sudoku field!
+        """
         if self.is_valid_coordinate(x, y) and self.is_valid_value(new_value):
             self.values[x][y] = new_value
         else:
             raise Exception(
-                "You are trying to access a value that is outside of the Sudoku field!"
+                "You are trying to set an invalid value or one that is outside of the Sudoku field!"
             )
 
     def is_empty(values: list[list[int]], x: int, y: int) -> bool:
-        ''' Checks if entry of given coordinates x and y is empty '''
+        """Checks if entry of given coordinates x and y is empty
+
+        >>> Sudoku.is_empty([[2, 3, 6, 7, 0, 0, 8, 0, 0], [9, 8, 0, 0, 3, 6, 0, 7, 0], [7, 0, 5, 0, 8, 1, 3, 2, 6], [3, 1, 9, 4, 6, 2, 5, 8, 0], [4, 6, 2, 8, 5, 7, 1, 3, 9], [8, 5, 0, 0, 1, 9, 6, 4, 0], [1, 7, 0, 0, 9, 3, 2, 0, 4], [6, 9, 0, 5, 0, 4, 7, 1, 8], [5, 2, 4, 1, 0, 8, 9, 6, 3]],0,3)
+        False
+        >>> Sudoku.is_empty([[2, 3, 6, 7, 0, 0, 8, 0, 0], [9, 8, 0, 0, 3, 6, 0, 7, 0], [7, 0, 5, 0, 8, 1, 3, 2, 6], [3, 1, 9, 4, 6, 2, 5, 8, 0], [4, 6, 2, 8, 5, 7, 1, 3, 9], [8, 5, 0, 0, 1, 9, 6, 4, 0], [1, 7, 0, 0, 9, 3, 2, 0, 4], [6, 9, 0, 5, 0, 4, 7, 1, 8], [5, 2, 4, 1, 0, 8, 9, 6, 3]],0,4)
+        True
+
+        """
         return values[x][y] == 0
 
     def is_valid_value(self, value: int):
+        """Checks if given value is valid, which implies that its value is not negative
+            and is not greater than the Sudoku field size
+
+        >>> s = Sudoku(size=9)
+        >>> s.is_valid_value(10)
+        False
+        >>> s.is_valid_value(-1)
+        False
+        >>> s.is_valid_value(1)
+        True
+        """
         return 0 <= value and value <= self.size
 
     def is_valid_coordinate(self, x: int, y: int) -> bool:
-        """Checks if given coordinates x and y lie in a sudoku field"""
+        """Checks if given coordinates x and y lie in a sudoku field
+
+        >>> s = Sudoku(size=9)
+        >>> s.is_valid_coordinate(9,8)
+        False
+        >>> s.is_valid_coordinate(-1,1)
+        False
+        >>> s.is_valid_coordinate(0,0)
+        True
+        """
         return 0 <= x and x < self.size and 0 <= y and y < self.size
 
     def solve(self):
@@ -117,6 +226,21 @@ class Sudoku(object):
         is not solvable.
         After calling this method the solution will be saved in the 'self.solution' attribute and the 'self.values'
         parameter will stay the same.
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[3, 5, 4, 2, 6, 8, 1, 9, 7], [2, 8, 6, 1, 9, 7, 3, 4, 5], [1, 7, 9, 3, 4, 5, 2, 6, 8], [7, 4, 3, 5, 2, 6, 8, 1, 9], [5, 6, 2, 8, 1, 9, 7, 3, 4], [8, 9, 1, 7, 3, 4, 5, 2, 6], [9, 3, 7, 4, 5, 2, 6, 8, 1], [6, 1, 8, 9, 7, 3, 4, 5, 2], [4, 2, 5, 6, 8, 1, 9, 7, 3]]
+        >>> s.solution = []
+        >>> s.solve()
+        >>> s.values == s.solution
+        True
+
+
+        >>> s.values = [[5, 5, 0, 2, 0, 8, 1, 9, 7], [2, 8, 6, 1, 9, 7, 3, 4, 5], [1, 7, 9, 3, 4, 5, 2, 6, 8], [7, 0, 3, 0, 2, 6, 8, 1, 0], [5, 6, 0, 8, 1, 9, 7, 0, 4], [8, 9, 1, 7, 3, 0, 5, 2, 6], [0, 3, 7, 4, 0, 2, 0, 0, 1], [6, 1, 8, 9, 7, 0, 4, 0, 2], [0, 0, 0, 6, 8, 1, 9, 0, 0]]
+        >>> s.solution = []
+        >>> s.solve() # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        Exception: Oh no! Seems like this Sudoku is unsolvable :(
         """
         if self.solution:
             return
@@ -140,12 +264,40 @@ class Sudoku(object):
             raise Exception("Oh no! Seems like this Sudoku is unsolvable :( ")
 
     def _deep_copy(source: list[list[int]]) -> list[list[int]]:
-        """Returns Deep Copy of two-dimensional list, such as the 'self.values' or 'self.solution' attribute"""
+        """Returns Deep Copy of two-dimensional list, such as the 'self.values' or 'self.solution' attribute
+
+        >>> source = [[1, 2, 3], [4, 5, 6]]
+        >>> dest = Sudoku._deep_copy(source)
+        >>> dest
+        [[1, 2, 3], [4, 5, 6]]
+        >>> source == dest
+        True
+        >>> source is dest
+        False
+        >>> source[0] == dest[0]
+        True
+        >>> source[0] is dest[0]
+        False
+        """
         return [row[:] for row in source]
 
     def _backtrack_sudoku(self, index) -> bool:
         """Solves complete sudoku game through a backtracking algorithm and returns if the game is solvable.
         But Caution, it is recursive, so 'self.size' should be not more than 36 otherwise the program gets slow!
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 8, 6, 1, 9, 7, 3, 4, 5], [1, 0, 9, 3, 4, 5, 2, 6, 8], [7, 4, 0, 5, 2, 6, 8, 1, 9], [5, 6, 2, 0, 1, 9, 7, 3, 4], [8, 9, 1, 7, 0, 4, 5, 2, 6], [9, 3, 7, 4, 5, 0, 6, 8, 1], [6, 1, 8, 9, 7, 3, 0, 5, 2], [4, 2, 5, 6, 8, 1, 9, 0, 3]]
+        >>> s._backtrack_sudoku(0)
+        True
+        >>> s.values == [[3, 5, 4, 2, 6, 8, 1, 9, 7], [2, 8, 6, 1, 9, 7, 3, 4, 5], [1, 7, 9, 3, 4, 5, 2, 6, 8], [7, 4, 3, 5, 2, 6, 8, 1, 9], [5, 6, 2, 8, 1, 9, 7, 3, 4], [8, 9, 1, 7, 3, 4, 5, 2, 6], [9, 3, 7, 4, 5, 2, 6, 8, 1], [6, 1, 8, 9, 7, 3, 4, 5, 2], [4, 2, 5, 6, 8, 1, 9, 7, 3]]
+        True
+
+        >>> s.values = [[0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        >>> s._backtrack_sudoku(0)
+        True
+        >>> s.values == [[1, 2, 3, 4, 5, 6, 7, 8, 9], [4, 5, 6, 7, 8, 9, 1, 2, 3], [7, 8, 9, 1, 2, 3, 4, 5, 6], [2, 1, 4, 3, 6, 5, 8, 9, 7], [3, 6, 5, 8, 9, 7, 2, 1, 4], [8, 9, 7, 2, 1, 4, 3, 6, 5], [5, 3, 1, 6, 4, 2, 9, 7, 8], [6, 4, 2, 9, 7, 8, 5, 3, 1], [9, 7, 8, 5, 3, 1, 6, 4, 2]]
+        True
+
         """
         if index == self.size * self.size:
             return self.is_solved()
@@ -163,7 +315,16 @@ class Sudoku(object):
         return self._backtrack_sudoku(index + 1)
 
     def is_filled(self) -> bool:
-        """Checks if the sudoku field is already completely filled"""
+        """Checks if the sudoku field is already completely filled
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5]]
+        >>> s.is_filled()
+        True
+        >>> s.values[0][0] = 0
+        >>> s.is_filled()
+        False
+        """
         for row in self.values:
             # If there is an empty value it is represented as '0'
             if not all(i != 0 for i in row):
@@ -173,6 +334,14 @@ class Sudoku(object):
     def is_valid(self) -> bool:
         """Checks if all sudoku field entries are valid.
         According to the rules there must not be any duplicate in every row and column, as well as in each grid
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[8, 0, 5, 7, 3, 4, 6, 1, 9], [4, 0, 3, 6, 9, 0, 2, 8, 5], [0, 0, 9, 2, 5, 0, 7, 4, 3], [6, 9, 8, 0, 0, 2, 3, 7, 1], [7, 3, 0, 9, 8, 6, 5, 2, 0], [0, 5, 4, 3, 1, 7, 9, 6, 8], [3, 1, 0, 8, 2, 9, 0, 5, 7], [0, 8, 2, 0, 7, 5, 1, 3, 6], [0, 4, 0, 1, 0, 3, 8, 0, 0]]
+        >>> s.is_valid()
+        True
+        >>> s.values[0][0] = 5
+        >>> s.is_valid()
+        False
         """
         return (
             self._is_valid_in_every_row()
@@ -181,14 +350,32 @@ class Sudoku(object):
         )
 
     def _is_valid_in_every_row(self) -> bool:
-        """Checks if all sudoku field entries are valid in every row"""
+        """Checks if all sudoku field entries are valid in every row
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[8, 0, 5, 7, 3, 4, 6, 1, 9], [4, 0, 3, 6, 9, 0, 2, 8, 5], [0, 0, 9, 2, 5, 0, 7, 4, 3], [6, 9, 8, 0, 0, 2, 3, 7, 1], [7, 3, 0, 9, 8, 6, 5, 2, 0], [0, 5, 4, 3, 1, 7, 9, 6, 8], [3, 1, 0, 8, 2, 9, 0, 5, 7], [0, 8, 2, 0, 7, 5, 1, 3, 6], [0, 4, 0, 1, 0, 3, 8, 0, 0]]
+        >>> s._is_valid_in_every_row()
+        True
+        >>> s.values[0][0] = 5
+        >>> s._is_valid_in_every_row()
+        False
+        """
         for row in self.values:
             if not Sudoku._is_valid_sudoku_list(row):
                 return False
         return True
 
     def _is_valid_in_every_column(self) -> bool:
-        """Checks if all sudoku field entries are valid in every column"""
+        """Checks if all sudoku field entries are valid in every column
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[8, 0, 5, 7, 3, 4, 6, 1, 9], [4, 0, 3, 6, 9, 0, 2, 8, 5], [0, 0, 9, 2, 5, 0, 7, 4, 3], [6, 9, 8, 0, 0, 2, 3, 7, 1], [7, 3, 0, 9, 8, 6, 5, 2, 0], [0, 5, 4, 3, 1, 7, 9, 6, 8], [3, 1, 0, 8, 2, 9, 0, 5, 7], [0, 8, 2, 0, 7, 5, 1, 3, 6], [0, 4, 0, 1, 0, 3, 8, 0, 0]]
+        >>> s._is_valid_in_every_column()
+        True
+        >>> s.values[0][6] = 2
+        >>> s._is_valid_in_every_column()
+        False
+        """
         for col in range(0, self.size):
             filled_vals = []
             for row in self.values:
@@ -198,7 +385,16 @@ class Sudoku(object):
         return True
 
     def _is_valid_in_every_grid(self) -> bool:
-        """Checks if all sudoku field entries are valid in every grid"""
+        """Checks if all sudoku field entries are valid in every grid
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[8, 0, 5, 7, 3, 4, 6, 1, 9], [4, 0, 3, 6, 9, 0, 2, 8, 5], [0, 0, 9, 2, 5, 0, 7, 4, 3], [6, 9, 8, 0, 0, 2, 3, 7, 1], [7, 3, 0, 9, 8, 6, 5, 2, 0], [0, 5, 4, 3, 1, 7, 9, 6, 8], [3, 1, 0, 8, 2, 9, 0, 5, 7], [0, 8, 2, 0, 7, 5, 1, 3, 6], [0, 4, 0, 1, 0, 3, 8, 0, 0]]
+        >>> s._is_valid_in_every_grid()
+        True
+        >>> s.values[1][1] = 8
+        >>> s._is_valid_in_every_grid()
+        False
+        """
         grids = []
         for row in self.values:
             for j in range(0, self.grid):
@@ -219,27 +415,72 @@ class Sudoku(object):
         for val in new.values():
             if not Sudoku._is_valid_sudoku_list(val):
                 return False
-        # TODO add example
 
         return True
 
     def _is_valid_sudoku_list(l: list) -> bool:
-        """A valid sudoku list should not contain duplicates, but empty entries that are represented as 0 are allowed"""
+        """A valid sudoku list should not contain duplicates, but empty entries that are represented as 0 are allowed
+
+        >>> Sudoku._is_valid_sudoku_list([7, 6, 9, 1, 2, 5, 8, 9, 4])
+        False
+        >>> Sudoku._is_valid_sudoku_list([0, 0, 0, 0, 0, 0, 0, 0, 0])
+        True
+        >>> Sudoku._is_valid_sudoku_list([7, 6, 0, 1, 2, 5, 8, 9, 4])
+        True
+        """
         l_without_zero = [item for item in l if item !=
                           0]  # Remove empty 0 cells
         # Check duplicates
         return len(l_without_zero) == len(set(l_without_zero))
 
     def is_solved(self) -> bool:
-        """Checks if the sudoku field is completely solved"""
+        """Checks if the sudoku field is completely solved
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[7, 2, 8, 3, 4, 6, 5, 1, 9], [5, 9, 1, 2, 8, 7, 6, 4, 3], [6, 3, 4, 9, 1, 5, 7, 8, 2], [1, 6, 3, 5, 9, 8, 4, 2, 7], [4, 7, 2, 6, 3, 1, 8, 9, 5], [8, 5, 9, 7, 2, 4, 1, 3, 6], [2, 8, 5, 4, 7, 3, 9, 6, 1], [9, 1, 6, 8, 5, 2, 3, 7, 4], [3, 4, 7, 1, 6, 9, 2, 5, 8]]
+        >>> s.is_solved()
+        True
+
+        >>> s.values[0][0] = 0
+        >>> s.is_solved()
+        False
+        """
         return self.is_filled() and self.is_valid()
 
     def remove(self, x: int, y: int):
-        """Removes an entry in a sudoku field and replaces it by invalid value 0"""
+        """Removes an entry in a sudoku field and replaces it by invalid value 0
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[5, 1, 3, 6, 4, 8, 9, 2, 7], [0, 4, 8, 2, 0, 9, 3, 5, 0], [0, 7, 9, 5, 1, 3, 8, 6, 0], [1, 3, 2, 0, 8, 5, 6, 7, 9], [0, 8, 5, 7, 0, 6, 0, 1, 3], [0, 0, 6, 0, 3, 2, 5, 0, 8], [9, 6, 4, 0, 2, 7, 1, 8, 5], [3, 2, 7, 0, 5, 1, 4, 9, 6], [8, 0, 1, 9, 6, 0, 0, 0, 0]]
+        >>> s.remove(0,0)
+        >>> Sudoku.is_empty(s.values,0,0)
+        True
+        >>> Sudoku.is_empty(s.values,0,1)
+        False
+        """
         self.set(x, y, 0)
 
     def __str__(self) -> LiteralString | str:
-        """String representation of a sudoku field as a formatted matrix"""
+        """String representation of a sudoku field as a formatted matrix
+
+        >>> s = Sudoku(size=9)
+        >>> s.values = [[8, 0, 0, 5, 1, 7, 6, 9, 3], [9, 3, 6, 4, 8, 0, 5, 1, 7], [1, 7, 5, 6, 9, 0, 4, 8, 2], [0, 4, 9, 8, 2, 0, 0, 0, 0], [7, 6, 1, 0, 3, 4, 8, 0, 5], [2, 5, 8, 1, 7, 0, 9, 0, 4], [4, 8, 3, 0, 5, 0, 0, 6, 9], [0, 0, 7, 3, 0, 8, 2, 0, 1], [5, 1, 2, 7, 6, 9, 3, 4, 8]]
+        >>> print(s)
+         -  -  -  -  -  -  -  -  - 
+        | 8       | 5  1  7 | 6  9  3 |
+        | 9  3  6 | 4  8    | 5  1  7 |
+        | 1  7  5 | 6  9    | 4  8  2 |
+         -  -  -  -  -  -  -  -  - 
+        |    4  9 | 8  2    |         |
+        | 7  6  1 |    3  4 | 8     5 |
+        | 2  5  8 | 1  7    | 9     4 |
+         -  -  -  -  -  -  -  -  - 
+        | 4  8  3 |    5    |    6  9 |
+        |       7 | 3     8 | 2     1 |
+        | 5  1  2 | 7  6  9 | 3  4  8 |
+        <BLANKLINE>
+
+        """
         rep = ""
         for i in range(0, self.size):
             # After every row of self.grid many fields there is a horizontal line
@@ -261,40 +502,7 @@ class Sudoku(object):
         return rep
 
 
-# Some experimental Code to test functions
+if __name__ == "__main__":
+    import doctest
 
-# f = Sudoku(36)
-# f.create(Difficulty.EASY)
-# print(f)
-# print(f.is_valid())
-# temp = Sudoku._deep_copy(f.solution)
-# f.solution = []
-
-# f.solve()
-# f.values = f.solution
-# print(f)
-
-
-# f.set(1, 1, 3)
-# f.set(2, 2, 3)
-
-# print(f.is_valid())
-# print(f)
-# print(f.is_filled())
-
-# board = [
-#         [7, 8, 0, 4, 0, 0, 1, 2, 0],
-#         [6, 0, 0, 0, 7, 5, 0, 0, 9],
-#         [0, 0, 0, 6, 0, 1, 0, 7, 8],
-#         [0, 0, 7, 0, 4, 0, 2, 6, 0],
-#         [0, 0, 1, 0, 5, 0, 9, 3, 0],
-#         [9, 0, 4, 0, 6, 0, 0, 0, 5],
-#         [0, 7, 0, 3, 0, 0, 0, 1, 2],
-#         [1, 2, 0, 0, 0, 7, 4, 0, 0],
-#         [0, 4, 9, 2, 0, 6, 0, 0, 7]
-# ]
-# print(f.is_valid())
-# f.values = board
-# print(f)
-# print(f.is_valid())
-# print(f.is_solved())
+    doctest.testmod(verbose=True)
