@@ -460,6 +460,21 @@ class Sudoku(object):
         """
         self.set(x, y, 0)
 
+    def get_a_hint(self) -> tuple[int,int,int]:
+        """ Returns the value of an empty field according to the following pattern: (x,y,value)
+        """
+        pass
+    
+    def show_wrong_fields(self) -> LiteralString | str:
+        """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
+        """
+        pass
+    
+    def _get_wrong_fields(self) -> list[list[int]]:
+        """ Compares current values to one possible solution and returns a field containing every different number
+        """
+        pass
+
     def __str__(self) -> LiteralString | str:
         """String representation of a sudoku field as a formatted matrix
 
