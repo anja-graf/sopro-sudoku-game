@@ -1,26 +1,38 @@
-from random import sample
+from random import sample, randint
 from enum import Enum
 from collections.abc import Sequence
 from typing import LiteralString
 
 
 class Difficulty(Enum):
-    """Represents Difficulties that can be chosen from while creating a new Sudoku game
-
-    >>> Difficulty.EASY
-    <Difficulty.EASY: 1>
-
-    >>> Difficulty.MEDIUM
-    <Difficulty.MEDIUM: 2>
-
-    >>> Difficulty.HARD
-    <Difficulty.HARD: 3>
-
-    """
+    """Represents Difficulties that can be chosen from while creating a new Sudoku game"""
 
     EASY = 1
     MEDIUM = 2
     HARD = 3
+
+
+class Colors(Enum):
+    """
+    This Enumeration collects some well chosen ansi escape sequences for graphic rendition 
+    parameters using control sequence introducer commands to generate colored output in console,
+    like described in: https://en.wikipedia.org/wiki/ANSI_escape_code
+    """
+    WHITE = '\033[97m'
+    CYAN = '\033[96m'
+    PURPLE = '\033[95m'
+    BLUE = '\033[94m'
+    YELLOW = '\033[93m'
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    GREY = '\033[90m'
+    CROSSED = '\033[9m'
+    INVERTED = '\033[7m'
+    BLINKING = '\033[5m]'
+    UNDERLINE = '\033[4m'
+    ITALIC = '\033[3m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
 
 
 class Sudoku(object):
@@ -454,18 +466,49 @@ class Sudoku(object):
         """
         self.set(x, y, 0)
 
-    def get_a_hint(self) -> tuple[int,int,int]:
-        """ Returns the value of an empty field according to the following pattern: (x,y,value)
+    def get_a_hint(self) -> tuple[int, int, int]:
+        """ Returns the value of an empty field according to the following pattern: (x, y, value)
+
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> x, y, value = s.get_a_hint()
+        >>> s.values[x][y] == 0
+        True
+        >>> s.solution[x][y] == value
+        True
+
+        >>> s.values = s.solution
+        >>> s.get_a_hint() # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        Exception: The Sudoku is already solved!
         """
-        pass
-    
+        self.solve()
+        if self.is_solved():
+            raise Exception("The Sudoku is already solved!")
+        pos_x = randint(0, self.size - 1)
+        pos_y = randint(0, self.size - 1)
+        while self.values[pos_x][pos_y] != 0:
+            pos_x = randint(0, self.size - 1)
+            pos_y = randint(0, self.size - 1)
+        return pos_x, pos_y, self.solution[pos_x][pos_y]
+
     def show_wrong_fields(self) -> LiteralString | str:
         """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
+
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> s.values[0][0] = 5
+        >>> s.values[0][1] = 5
+        >>> "\x1b[91m5\x1b[0m" in s.show_wrong_fields() # Note that the expression in quotation marks is a red 5 (also noticeable in the tests output)
+        True
         """
-    
+        wrong_fields = self._get_wrong_fields()
+        return self.__str__(wrong_fields, Colors.RED)
+
     def _get_wrong_fields(self) -> list[list[int]]:
         """ Compares current values to one possible solution and returns a field containing every different number
-        
+
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
         >>> s.values[0][0] = 5
@@ -476,9 +519,9 @@ class Sudoku(object):
         """
         self.solve()
         wrong_fields = []
-        for row in range(0,self.size):
+        for row in range(0, self.size):
             value_row = []
-            for col in range(0,self.size):
+            for col in range(0, self.size):
                 if self.values[row][col] != self.solution[row][col]:
                     value_row.append(self.values[row][col])
                 else:
@@ -486,7 +529,7 @@ class Sudoku(object):
             wrong_fields.append(value_row)
         return wrong_fields
 
-    def __str__(self) -> LiteralString | str:
+    def __str__(self, highlighted_values: list[list[int]] = ..., highlighted_color: Colors = ...) -> LiteralString | str:
         """String representation of a sudoku field as a formatted matrix
 
         >>> s = Sudoku(size=9,values=[[8, 0, 0, 5, 1, 7, 6, 9, 3], [9, 3, 6, 4, 8, 0, 5, 1, 7], [1, 7, 5, 6, 9, 0, 4, 8, 2], [0, 4, 9, 8, 2, 0, 0, 0, 0], [7, 6, 1, 0, 3, 4, 8, 0, 5], [2, 5, 8, 1, 7, 0, 9, 0, 4], [4, 8, 3, 0, 5, 0, 0, 6, 9], [0, 0, 7, 3, 0, 8, 2, 0, 1], [5, 1, 2, 7, 6, 9, 3, 4, 8]])
@@ -521,8 +564,14 @@ class Sudoku(object):
                     # Zero represents an empty value
                     rep += "   "
                 else:
-                    # Actual number values of the sudoku field
-                    rep += " " + str(self.values[i][j]) + " "
+                    if highlighted_values is ... or highlighted_color is ... or Sudoku.is_empty(highlighted_values, i, j):
+                        # Actual number values of the sudoku field
+                        rep += " " + str(self.values[i][j]) + " "
+                    else:
+                        # Colored output of those values of highlighted_values that are not empty
+                        rep += " " + highlighted_color.value + \
+                            str(highlighted_values[i][j]
+                                ) + Colors.END.value + " "
             rep += "|\n"
         return rep
 
