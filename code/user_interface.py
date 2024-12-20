@@ -7,8 +7,11 @@
 # Software Assignment                #
 ######################################
 
+from sudoku import Sudoku
 from game import Game
 from player import Player
+from game import Game
+from persistance import Persistance
 
 class UI:
     '''
@@ -22,30 +25,39 @@ class UI:
         Creates a new user interface. Think about which pieces of information you need at this time
         (e.g. players, game mode, time limit, ...) and add them as arguments.
         '''
+        persistance = Persistance("data.json")
+
+
+    @staticmethod
+    def give_instruction():
+        print("Welcome to Sudoku: xxx")  
+        
+        print("[n] New Game")  
+        print("[c] Continue")  
+        print("[e] Exit")  
+
+
+    def display(self, sudoku: Sudoku):
         pass
 
-    def load_highscore(self, filename):
-        pass
-
-    def add_highscore(self, name, score, scores):
-        pass
-
-    def save_highscore(self, scores, filename):
-        pass
-
-    def display(self):
-        pass
-
-    def frame(self):
-        pass
-
-    def wait_for_input(self):
-        pass
+    def read_input(self):
+        s = input()
+        if s == "e":
+            exit()
+        elif s == "n":
+            pass
+            
+        elif s == "c":
+            pass
 
 
 if __name__ == '__main__':
+
+
     '''
     write additional testing code here for things that don't work well as unit tests:
     '''
     ui = UI()
+    ui.give_instruction()
+    while (ui.read_input != )
     ...
