@@ -9,7 +9,7 @@
 
 from player import Player
 from sudoku import *
-
+import time
 
 class Game:
     """
@@ -31,12 +31,18 @@ class Game:
         self.player = None
         self.hint_counter = 0
         
+        self.time_start = None
+        self.time_length = None
 
-    def start_timer():
+    def start_timer(self):
         """This is a helper method to start a timer a soon as a Game is created."""
-        # Anjas TODO Implement
-        pass
+        self.time_start = time.time()
 
+    def stop_timer(self):
+        """This is a helper method to measure the needed time for the sudoku."""
+        self.time_length = int(time.time() - self.time_start) # int cast to get seconds
+        del self.time_start
+        
     def set_player(self,player:Player):
         """Sets a given Player object as the player for the current game session. 
         An add_player() method that was suggested in the given Game class code is not 
@@ -124,12 +130,14 @@ class Game:
         '''
         Game.clear()
         print("Welcome!") # TODO delete as soon as implemented and call function that prints a welcome instead
+        self.start_timer()
         print(self.get_current_state())
         print("Type in 'h' or 'hint' for a hint\t") # TODO print out instructions
         while not self.is_finished():
             self.step()
             print("Type in 'h' or 'hint' for a hint\t") # TODO print out instructions
-        print("Congratulations, you finished the sudoku with " + str(self.hint_counter) + " hints!") 
+        self.stop_timer()
+        print("Congratulations, you finished the sudoku within " + str(self.time_length) +" seconds using " + str(self.hint_counter) + " hints!") 
         # TODO delete as soon as implemented
         self.finish_game()
         
