@@ -10,11 +10,20 @@
 
 class Player:
 
-    def __init__(self, name):
+    def __init__(self, password):
         '''
         Creates a new Player. Think about which pieces of information you need at this time
         (e.g. name, highscore, input method) and add them as arguments.
         '''
+        pass
+
+    def add_password(password):
+        pass
+
+    def log_in(name, password):
+        pass
+
+    def update_highscore(new_highscore):
         pass
 
 
