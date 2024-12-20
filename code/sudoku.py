@@ -28,7 +28,7 @@ class Colors(Enum):
     GREY = '\033[90m'
     CROSSED = '\033[9m'
     INVERTED = '\033[7m'
-    BLINKING = '\033[5m]'
+    BLINKING = '\033[5m'
     UNDERLINE = '\033[4m'
     ITALIC = '\033[3m'
     BOLD = '\033[1m'
@@ -466,19 +466,19 @@ class Sudoku(object):
         """
         self.set(x, y, 0)
 
-    def get_a_hint(self) -> tuple[int, int, int]:
+    def _get_a_hint(self) -> tuple[int, int, int]:
         """ Returns the value of an empty field according to the following pattern: (x, y, value)
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
-        >>> x, y, value = s.get_a_hint()
+        >>> x, y, value = s._get_a_hint()
         >>> s.values[x][y] == 0
         True
         >>> s.solution[x][y] == value
         True
 
         >>> s.values = s.solution
-        >>> s.get_a_hint() # doctest: +IGNORE_EXCEPTION_DETAIL
+        >>> s._get_a_hint() # doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
             ...
         Exception: The Sudoku is already solved!
@@ -492,6 +492,18 @@ class Sudoku(object):
             pos_x = randint(0, self.size - 1)
             pos_y = randint(0, self.size - 1)
         return pos_x, pos_y, self.solution[pos_x][pos_y]
+    
+    def show_and_set_hint(self) -> LiteralString | str:
+        # TODO Write Docs and Test
+        return self.show_and_set_value(*self._get_a_hint(),highlighted_color=Colors.CYAN)
+
+    def show_and_set_value(self,x: int,y: int,value: int, highlighted_color: Colors) -> LiteralString | str:
+        # TODO Write Docs and Test
+        highlighted_list = [[0 for i in range(self.size)] 
+                            for j in range(self.size)]
+        highlighted_list[x][y] = value
+        self.set(x,y,value)
+        return self.__str__(highlighted_values=highlighted_list,highlighted_color=highlighted_color)
 
     def show_wrong_fields(self) -> LiteralString | str:
         """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
