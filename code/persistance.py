@@ -34,6 +34,12 @@ class Persistance:
             pass
 
         return highscores
+    
+    def load_names(self):
+        names = list()
+        for name in self.data:
+            names.append(name)
+        return names
 
     def save_game(self, game):
         if bool(self.data[game.name]) == False:
