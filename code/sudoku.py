@@ -14,25 +14,26 @@ class Difficulty(Enum):
 
 class Colors(Enum):
     """
-    This Enumeration collects some well chosen ansi escape sequences for graphic rendition 
+    This Enumeration collects some well chosen ansi escape sequences for graphic rendition
     parameters using control sequence introducer commands to generate colored output in console,
     like described in: https://en.wikipedia.org/wiki/ANSI_escape_code
     """
-    WHITE = '\033[97m'
-    CYAN = '\033[96m'
-    PURPLE = '\033[95m'
-    BLUE = '\033[94m'
-    YELLOW = '\033[93m'
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    GREY = '\033[90m'
-    CROSSED = '\033[9m'
-    INVERTED = '\033[7m'
-    BLINKING = '\033[5m'
-    UNDERLINE = '\033[4m'
-    ITALIC = '\033[3m'
-    BOLD = '\033[1m'
-    END = '\033[0m'
+
+    WHITE = "\033[97m"
+    CYAN = "\033[96m"
+    PURPLE = "\033[95m"
+    BLUE = "\033[94m"
+    YELLOW = "\033[93m"
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    GREY = "\033[90m"
+    CROSSED = "\033[9m"
+    INVERTED = "\033[7m"
+    BLINKING = "\033[5m"
+    UNDERLINE = "\033[4m"
+    ITALIC = "\033[3m"
+    BOLD = "\033[1m"
+    END = "\033[0m"
 
 
 class Sudoku(object):
@@ -106,6 +107,8 @@ class Sudoku(object):
         True
         >>> s.solution != []
         True
+        >>> s._count_empty_cells() != 0
+        True
         """
         self._generate()
         self._remove_numbers(difficulty)
@@ -121,6 +124,8 @@ class Sudoku(object):
         True
         >>> s.solution == s.values
         True
+        >>> s._count_empty_cells()
+        0
         """
         rows = []
         for g in self._shuffle():
@@ -137,8 +142,7 @@ class Sudoku(object):
             b = []
             for c in cols:
                 b.append(
-                    nums[(self.grid * (r % self.grid) +
-                          r // self.grid + c) % self.size]
+                    nums[(self.grid * (r % self.grid) + r // self.grid + c) % self.size]
                 )
             self.values.append(b)
         self.solution = Sudoku._deep_copy(self.values)
@@ -168,6 +172,8 @@ class Sudoku(object):
         >>> s.is_solved()
         False
         >>> s.solution != s.values
+        True
+        >>> s._count_empty_cells() != 0
         True
         """
         squares = self.size**2
@@ -207,6 +213,20 @@ class Sudoku(object):
 
         """
         return values[x][y] == 0
+
+    def _count_empty_cells(self) -> int:
+        """Counts amount of empty cells in a sudoku field. 
+
+        >>> s = Sudoku(size=9,values=[[5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5], [5, 5, 5, 5, 5, 5, 5, 5, 5]])
+        >>> s._count_empty_cells()
+        0
+        >>> s.values = [[0 for i in range(s.size)] for j in range(s.size)]
+        >>> s._count_empty_cells()
+        81
+        """
+        return sum(
+            i == 0 for i in [row[i] for row in self.values for i in range(0, self.size)]
+        )
 
     def is_valid_value(self, value: int):
         """Checks if given value is valid, which implies that its value is not negative
@@ -436,8 +456,7 @@ class Sudoku(object):
         >>> Sudoku._is_valid_sudoku_list([7, 6, 0, 1, 2, 5, 8, 9, 4])
         True
         """
-        l_without_zero = [item for item in l if item !=
-                          0]  # Remove empty 0 cells
+        l_without_zero = [item for item in l if item != 0]  # Remove empty 0 cells
         # Check duplicates
         return len(l_without_zero) == len(set(l_without_zero))
 
@@ -467,7 +486,7 @@ class Sudoku(object):
         self.set(x, y, 0)
 
     def _get_a_hint(self) -> tuple[int, int, int]:
-        """ Returns the value of an empty field according to the following pattern: (x, y, value)
+        """Returns the value of an empty field according to the following pattern: (x, y, value)
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
@@ -494,29 +513,77 @@ class Sudoku(object):
         return pos_x, pos_y, self.solution[pos_x][pos_y]
 
     def show_and_set_hint(self) -> LiteralString | str:
-        # TODO Write Docs and Test
-        return self.show_and_set_value(*self._get_a_hint(), highlighted_color=Colors.CYAN)
+        """Gets a hint and sets it directly in the sudoku field with Cyan color. This is handy, because a user
+        should not have to set the hint separately later on.
 
-    def show_and_set_value(self, x: int, y: int, value: int, highlighted_color: Colors) -> LiteralString | str:
-        # TODO Write Docs and Test
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> x = s._count_empty_cells()
+        >>> str = s.show_and_set_hint()
+        >>> x == s._count_empty_cells() + 1
+        True
+        """
+        return self.show_and_set_value(
+            *self._get_a_hint(), highlighted_color=Colors.CYAN
+        )
+
+    def show_and_set_value(
+        self, x: int, y: int, value: int, highlighted_color: Colors
+    ) -> LiteralString | str:
+        """Sets value on given coordinates directly in the sudoku field and returns a string representation
+        with the single value field colored and the other fields normal.
+
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> "\x1b[92m1\x1b[0m" in s.show_and_set_value(1,1,1,Colors.GREEN) # Note that the expression in quotation marks is a green 1 (also noticeable in the tests output)
+        True
+        """
         self.set(x, y, value)
         return self.show_value(x, y, highlighted_color)
 
-    def show_value(self, x: int, y: int, highlighted_color: Colors) -> LiteralString | str:
-        # TODO Write Docs and Test
-        highlighted_list = [[0 for i in range(self.size)]
-                            for j in range(self.size)]
+    def show_value(
+        self, x: int, y: int, highlighted_color: Colors
+    ) -> LiteralString | str:
+        """Returns a string representation with the given color on the single value field.
+        Also empty value cells can be colored. In this case there will be an underscore as replacement in the string representation instead.
+
+        >>> s = Sudoku()
+        >>> s.create()
+        >>> s.set(1,1,0)
+        >>> "\x1b[94m_\x1b[0m" in s.show_value(1,1,Colors.BLUE) # Note that the expression in quotation marks is a blue underscore (also noticeable in the tests output)
+        True
+        >>> s.set(1,1,6)
+        >>> "\x1b[94m6\x1b[0m" in s.show_value(1,1,Colors.BLUE) # Note that the expression in quotation marks is a blue 6 (also noticeable in the tests output)
+        True
+        """
+        highlighted_list = [[0 for i in range(self.size)] for j in range(self.size)]
         highlighted_list[x][y] = self.values[x][y]
         if self.values[x][y] == 0:
-            highlighted_list[x][y] = '_'
-        return self.__str__(highlighted_values=highlighted_list, highlighted_color=highlighted_color)
+            highlighted_list[x][y] = "_"
+        return self.__str__(
+            highlighted_values=highlighted_list, highlighted_color=highlighted_color
+        )
 
     def show_blinking_cell(self, x: int, y: int) -> LiteralString | str:
-        # TODO Write Docs and Test
+        """Returns a string representation with a blinking cell at the given coordinates. 
+        That will be either an actual value or an underscore, depending on if the value is empty in the sudoku field.
+        
+        Notice that you might have to execute the program in a separate console because 
+        e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
+
+        >>> s = Sudoku()
+        >>> s.create()
+        >>> s.set(1,1,0)
+        >>> "\033[5m_\x1b[0m" in s.show_blinking_cell(1,1) # Note that the expression in quotation marks is a blinking underscore (also noticeable in the tests output)
+        True
+        >>> s.set(1,1,6)
+        >>> "\033[5m6\x1b[0m" in s.show_blinking_cell(1,1) # Note that the expression in quotation marks is a blinking 6 (also noticeable in the tests output)
+        True
+        """
         return self.show_value(x, y, Colors.BLINKING)
 
     def show_wrong_fields(self) -> LiteralString | str:
-        """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
+        """Gets a string representation of current sudoku field values with wrong ones marked through ansi escape sequences
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
@@ -529,7 +596,7 @@ class Sudoku(object):
         return self.__str__(wrong_fields, Colors.RED)
 
     def _get_wrong_fields(self) -> list[list[int]]:
-        """ Compares current values to one possible solution and returns a field containing every different number
+        """Compares current values to one possible solution and returns a field containing every different number
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
@@ -551,8 +618,17 @@ class Sudoku(object):
             wrong_fields.append(value_row)
         return wrong_fields
 
-    def __str__(self, highlighted_values: list[list[int | str]] = ..., highlighted_color: Colors = ...) -> LiteralString | str:
-        """String representation of a sudoku field as a formatted matrix
+    def __str__(
+        self,
+        highlighted_values: list[list[int | str]] = ...,
+        highlighted_color: Colors = ...,
+    ) -> LiteralString | str:
+        """String representation of a sudoku field as a formatted matrix. All empty cells with 0 will be replaces with spaces.
+        If both highlighted_values and highlighted_color are given, every entry in highlighted_values that is not empty will be printed
+        in the given color instead of the originally value entry of the sudoku field.
+        
+        Notice that you might have to execute the program in a separate console because 
+        e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
 
         >>> s = Sudoku(size=9,values=[[8, 0, 0, 5, 1, 7, 6, 9, 3], [9, 3, 6, 4, 8, 0, 5, 1, 7], [1, 7, 5, 6, 9, 0, 4, 8, 2], [0, 4, 9, 8, 2, 0, 0, 0, 0], [7, 6, 1, 0, 3, 4, 8, 0, 5], [2, 5, 8, 1, 7, 0, 9, 0, 4], [4, 8, 3, 0, 5, 0, 0, 6, 9], [0, 0, 7, 3, 0, 8, 2, 0, 1], [5, 1, 2, 7, 6, 9, 3, 4, 8]])
         >>> print(s)
@@ -582,7 +658,11 @@ class Sudoku(object):
                 if j % self.grid == 0:
                     rep += "|"
 
-                if highlighted_values is ... or highlighted_color is ... or Sudoku.is_empty(highlighted_values, i, j):
+                if (
+                    highlighted_values is ...
+                    or highlighted_color is ...
+                    or Sudoku.is_empty(highlighted_values, i, j)
+                ):
                     # Cell should not be highlighted
                     if self.values[i][j] == 0:
                         # Zero represents an empty cell
@@ -592,9 +672,13 @@ class Sudoku(object):
                         rep += " " + str(self.values[i][j]) + " "
                 else:
                     # Colored output of those values of highlighted_values that are not empty
-                    rep += " " + highlighted_color.value + \
-                        str(highlighted_values[i][j]
-                            ) + Colors.END.value + " "
+                    rep += (
+                        " "
+                        + highlighted_color.value
+                        + str(highlighted_values[i][j])
+                        + Colors.END.value
+                        + " "
+                    )
             rep += "|\n"
         return rep
 
