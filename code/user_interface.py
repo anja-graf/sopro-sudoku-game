@@ -10,7 +10,7 @@
 from sudoku import Sudoku, Difficulty, Colors
 from game import Game
 from player import Player
-from persistance import Persistance
+from persistence import Persistence
 
 
 class UI:
@@ -25,7 +25,7 @@ class UI:
         Creates a new user interface. Think about which pieces of information you need at this time
         (e.g. players, game mode, time limit, ...) and add them as arguments.
         """
-        self.persistance = None
+        self.persistence = None
         self.current_game = None
         self.name = ""
         self.password = ""
@@ -36,16 +36,16 @@ class UI:
         s = input().strip()
         self.name = s
         print("Hello" + s)
-        if s in self.persistance.data:
+        if s in self.persistence.data:
             print(
                 "Welcome back\nYou have played: "
-                + len(self.persistance.data[s])
+                + len(self.persistence.data[s])
                 + " Games"
             )
             # wenn passwort vorhanden, eingeben
         else:
             print("Welcome " + s)
-            self.persistance.data[s]
+            self.persistence.data[s]
             self.password = self.select_password()
             self.player = Player(self.name, self.password)
 
@@ -62,7 +62,7 @@ class UI:
 
             elif s == "n":
                 # json file geöffnet bzw eine neue datei erstellt
-                self.persistance = Persistance("data.json")
+                self.persistence = Persistence("data.json")
 
                 print("Which size do you want?")
                 self.size = self.select_size()
@@ -73,15 +73,15 @@ class UI:
                 self.game = Game(size=self.size, difficulty=self.difficulty)
 
             elif s == "c":
-                if Persistance.load_game() == None:
+                if Persistence.load_game() == None:
                     print("Looks like theres no game to continue :(")
-                g = Persistance.load_game()
+                g = Persistence.load_game()
 
             print("Invalid Input, please try again!")
 
     def choose_input(self):
         print("What do you want to do?")
-        # Coordinate Input, Instruction, Hint, Show wrong fields, Leave Game, Show Highscores
+        # Coordinate Input, Instruction, Hint, Show wrong fields, Leave Game, Show high scores
         while True:
             print("[i]: Show Instructions")
             print("[h]: Give me a Hint")
@@ -162,7 +162,7 @@ class UI:
 
     @staticmethod
     def give_instruction():
-        print("Instrutions:")
+        print("Instructions:")
         print("How to play Sudoku:")
         print("Sudoku has a 9x9 grid, divided into 9 smaller 3x3 boxes.")
         print(
@@ -172,8 +172,8 @@ class UI:
         print("A number can appear only once in each column.")
         print("A number can appear only once in each 3x3 box.\n")
 
-    def display(self, sudoku: Sudoku):
-        print(self.current_game.__str__())
+    def display(self):
+        print(self.current_game.sudoku)
 
     def select_password(self):
         print("Do you want to add a Password?")
@@ -191,7 +191,7 @@ class UI:
         s = input()
 
     def select_difficulty(self):
-        print("Selelect your difficulty")
+        print("Select your difficulty")
         while True:
             print("[e] : Easy\n[m] : medium\n[h] : hard")
             s = input().strip().lower()

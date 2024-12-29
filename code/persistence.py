@@ -5,8 +5,8 @@ from player import Player
 from game import Game
 
 
-class Persistance:
-    """This class controlls the saving and loading 
+class Persistence:
+    """This class controls the saving and loading 
     """
 
     def __init__(self, filename):
