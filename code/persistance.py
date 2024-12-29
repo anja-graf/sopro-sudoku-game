@@ -1,17 +1,18 @@
 import os.path
 import json
 from collections import defaultdict
+from player import Player
 from game import Game
 
 
 class Persistance:
     """This class controlls the saving and loading 
     """
-    
+
     def __init__(self, filename):
         """
         speichert json objekte in einer datei und öffnet diese, falls sie schon existiert
-        
+
         Args:
             filename (str): name der json datei (data.json)
         """
@@ -20,38 +21,57 @@ class Persistance:
             with open(filename) as json_data:
                 self.data = json.load(json_data)
         else:
-            self.data = defaultdict(dict)      
-            
+            self.data = defaultdict(dict)
 
+    def get_players(self) -> list[Player]:
+        """Get a list of all players
 
-    def save_highscore(self, game, name, score):
-        self.data[game.name]["games"]["highscores"].append(score)
+        Returns:
+            list[Player]: List of `Player` instances
+        """
+        return [Player.from_dict(player_dict) for player_dict in self.data["players"]]
 
+    def save_player(self, player: Player):
+        """Saves a `Player` instance. Either overrides the player if it already exists, or creates a new one.
 
-    def load_highscore(self):
-        highscores = list()
-        for name in self.data:
-            pass
+        Args:
+            player (Player): The player which is to be saved.
+        """
+        new_player_dict = player.to_dict()
+        replaced = False
+        for i, p in enumerate(self.data["players"]):
+            if p["name"] == player.name:
+                self.data["players"][i] = new_player_dict
+                replaced = True
+                break
 
-        return highscores
-    
-    def load_names(self):
-        names = list()
-        for name in self.data:
-            names.append(name)
-        return names
+        if replaced == False:
+            self.data["players"].append(new_player_dict)
 
-    def save_game(self, game):
-        if bool(self.data[game.name]) == False:
-            self.data[game.name]["games"] = list()
-        
-        self.data[game.name]["games"].append({"finished": game.is_finished()})
-        self.data[game.name]["games"].append({"difficulty": game.difficulty()})
+    def get_games_for_player(self, player_name_: str):
+        """Gets all games for a player.
 
-        with open(self.filename, "w") as json_data:
-            json.dump(self.data, json_data)
-
-
-    def load_game(self, name) -> list[Game]:
+        Args:
+            player_name (str): The players name.
+        """
         pass
 
+    def get_game(self, player_name, game_name):
+        """Gets a game by player and game name.
+        """
+        pass
+
+    def save_game(self, game: Game):
+        """Saves a game.
+
+        Args:
+            game (Game): The game that is to be saved.
+        """
+        pass
+
+    def save_to_json(self):
+        """Writes all changes of the `data` attribute to the json file.
+        """
+        with open(self.filename, "w") as json_data:
+            json.dump(self.data, json_data)
+        pass
