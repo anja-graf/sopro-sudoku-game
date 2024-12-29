@@ -513,7 +513,7 @@ class Sudoku(object):
 
     def show_blinking_cell(self, x: int, y: int) -> LiteralString | str:
         # TODO Write Docs and Test
-        return s.show_value(x, y, Colors.BLINKING)
+        return self.show_value(x, y, Colors.BLINKING)
 
     def show_wrong_fields(self) -> LiteralString | str:
         """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
