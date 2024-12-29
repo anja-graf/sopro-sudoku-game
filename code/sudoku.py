@@ -492,18 +492,28 @@ class Sudoku(object):
             pos_x = randint(0, self.size - 1)
             pos_y = randint(0, self.size - 1)
         return pos_x, pos_y, self.solution[pos_x][pos_y]
-    
+
     def show_and_set_hint(self) -> LiteralString | str:
         # TODO Write Docs and Test
-        return self.show_and_set_value(*self._get_a_hint(),highlighted_color=Colors.CYAN)
+        return self.show_and_set_value(*self._get_a_hint(), highlighted_color=Colors.CYAN)
 
-    def show_and_set_value(self,x: int,y: int,value: int, highlighted_color: Colors) -> LiteralString | str:
+    def show_and_set_value(self, x: int, y: int, value: int, highlighted_color: Colors) -> LiteralString | str:
         # TODO Write Docs and Test
-        highlighted_list = [[0 for i in range(self.size)] 
+        self.set(x, y, value)
+        return self.show_value(x, y, highlighted_color)
+
+    def show_value(self, x: int, y: int, highlighted_color: Colors) -> LiteralString | str:
+        # TODO Write Docs and Test
+        highlighted_list = [[0 for i in range(self.size)]
                             for j in range(self.size)]
-        highlighted_list[x][y] = value
-        self.set(x,y,value)
-        return self.__str__(highlighted_values=highlighted_list,highlighted_color=highlighted_color)
+        highlighted_list[x][y] = self.values[x][y]
+        if self.values[x][y] == 0:
+            highlighted_list[x][y] = '_'
+        return self.__str__(highlighted_values=highlighted_list, highlighted_color=highlighted_color)
+
+    def show_blinking_cell(self, x: int, y: int) -> LiteralString | str:
+        # TODO Write Docs and Test
+        return s.show_value(x, y, Colors.BLINKING)
 
     def show_wrong_fields(self) -> LiteralString | str:
         """ Gets a string representation of current sudoku field values with wrong ones marked through ansi sequences
@@ -541,7 +551,7 @@ class Sudoku(object):
             wrong_fields.append(value_row)
         return wrong_fields
 
-    def __str__(self, highlighted_values: list[list[int]] = ..., highlighted_color: Colors = ...) -> LiteralString | str:
+    def __str__(self, highlighted_values: list[list[int | str]] = ..., highlighted_color: Colors = ...) -> LiteralString | str:
         """String representation of a sudoku field as a formatted matrix
 
         >>> s = Sudoku(size=9,values=[[8, 0, 0, 5, 1, 7, 6, 9, 3], [9, 3, 6, 4, 8, 0, 5, 1, 7], [1, 7, 5, 6, 9, 0, 4, 8, 2], [0, 4, 9, 8, 2, 0, 0, 0, 0], [7, 6, 1, 0, 3, 4, 8, 0, 5], [2, 5, 8, 1, 7, 0, 9, 0, 4], [4, 8, 3, 0, 5, 0, 0, 6, 9], [0, 0, 7, 3, 0, 8, 2, 0, 1], [5, 1, 2, 7, 6, 9, 3, 4, 8]])
@@ -572,18 +582,19 @@ class Sudoku(object):
                 if j % self.grid == 0:
                     rep += "|"
 
-                if self.values[i][j] == 0:
-                    # Zero represents an empty value
-                    rep += "   "
-                else:
-                    if highlighted_values is ... or highlighted_color is ... or Sudoku.is_empty(highlighted_values, i, j):
+                if highlighted_values is ... or highlighted_color is ... or Sudoku.is_empty(highlighted_values, i, j):
+                    # Cell should not be highlighted
+                    if self.values[i][j] == 0:
+                        # Zero represents an empty cell
+                        rep += "   "
+                    else:
                         # Actual number values of the sudoku field
                         rep += " " + str(self.values[i][j]) + " "
-                    else:
-                        # Colored output of those values of highlighted_values that are not empty
-                        rep += " " + highlighted_color.value + \
-                            str(highlighted_values[i][j]
-                                ) + Colors.END.value + " "
+                else:
+                    # Colored output of those values of highlighted_values that are not empty
+                    rep += " " + highlighted_color.value + \
+                        str(highlighted_values[i][j]
+                            ) + Colors.END.value + " "
             rep += "|\n"
         return rep
 
