@@ -31,6 +31,9 @@ class UI:
         self.password = ""
 
     def select_user(self):
+        """selects the user, with or without a password
+        """
+
         print("Hello and Welcome to Sudoku: ")
         print("Who are you?")
         s = input().strip()
@@ -50,6 +53,7 @@ class UI:
             self.player = Player(self.name, self.password)
 
     def select_game(self):
+        
         print("What do you want to do?")
         while True:
             print("[n] New Game")
@@ -76,36 +80,47 @@ class UI:
                 if Persistence.load_game() == None:
                     print("Looks like theres no game to continue :(")
                 g = Persistence.load_game()
+                #?
 
             print("Invalid Input, please try again!")
 
     def choose_input(self):
+        """_summary_
+
+        Returns:
+            str: the input as a string (i, h, p, w, s, c, e)
+            h, w, s should be handled in game class
+            i, p, c, e is handled in ui class
+        """
+
         print("What do you want to do?")
-        # Coordinate Input, Instruction, Hint, Show wrong fields, Leave Game, Show high scores
         while True:
             print("[i]: Show Instructions")
             print("[h]: Give me a Hint")
             print("[p]: Play the game and type in Coordinates and Value for Input")
             print("[w]: Show wrong fields")
-            print("[h]: Show Highscores")
+            print("[s]: Show Highscores")
             print("[c]: Clear the terminal")
             print("[e]: Exit the game")
             s = input().strip().lower()
 
             if s == "i":
                 self.give_instruction()
-
+                return s
+            
             elif s == "h":
-                pass
+                return s
+                
             elif s == "p":
                 x, y = self.input_coordinates()
                 self.input_value(x, y)
+                return s
 
             elif s == "w":
-                pass
+                return s
 
-            elif s == "h":
-                pass
+            elif s == "s":
+                return s
 
             elif s == "c":
                 from os import system, name
@@ -114,10 +129,11 @@ class UI:
                     system("cls")  # windows
                 else:
                     system("clear")  # mac and linux, 'posix'
+                return s    
 
             elif s == "e":
                 print("Good bye! See you soon")
-                return False
+                return s
 
             else:
                 print("Not a valid input!")
@@ -188,9 +204,17 @@ class UI:
                 return s
 
     def select_size():
+        #TODO 
         s = input()
 
+
     def select_difficulty(self):
+        """selects the difficulty
+
+        Returns:
+            Difficulty: the difficulty which the user has typed into the consol
+        """
+
         print("Select your difficulty")
         while True:
             print("[e] : Easy\n[m] : medium\n[h] : hard")

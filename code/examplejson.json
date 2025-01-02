@@ -1,48 +1,22 @@
 {
-      "name1" : {
-            "games": [
-            { 
-                  "game1"  : "xxx",
-                  "difficulty" : "Easy",
-                  "finished" : "False"
-                  
-            }
+      "names":
+      {
+            "serafina" : "djnewpfinre",
+            "anja" : ""
+      },
 
-            
-      ],
-            "highscores" : [2.65, 5.45]
-},     
-      
-
-      "name2" : {
-            "games": [
-            { 
-                  "game1"  : "xxx",
-                  "difficulty" : "Easy",
-                  "finished" : "False"
+      "games": {
+            "game1" : {
+                  "name" : "serafina",
+                  "str-rep" : "XXX"
                   
+
             },
-            {     
-                  "game2" : "xxx",
-                  "difficulty" : "Easy",
-                  "finished" : "False"
+            "game2" : {
+                  "name" : "anja",
+                  "str-rep" : "XXX"
                   
-            }
-      ],
-            "highscores" : [2.65, 5.45]
-},
-            
-      "name3" : {
-            "games": [
-            { 
-                  "game1"  : "xxx",
-                  "difficulty" : "Easy",
-                  "finished" : "False"
 
             }
-      ],
-            "highscores" : [2.65, 5.45]   
-
-            
-},    "all_highscores" : [2.32, 8,54]
+      }
 }
