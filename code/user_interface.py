@@ -8,7 +8,7 @@
 ######################################
 
 from sudoku import *
-from game import Game
+from game import *
 from player import Player
 from persistence import Persistence
 
@@ -25,14 +25,20 @@ class UI:
         Creates a new user interface. Think about which pieces of information you need at this time
         (e.g. players, game mode, time limit, ...) and add them as arguments.
         """
-        self.current_game = None
+        self.game = Game(ui=self)
         self.player = None
         UI._welcome()
-        UI.choose_input_options_pre_game()
+        self.choose_input_options_pre_game()
 
     def _welcome():
         # TODO Animation maybe
+        UI.clear()
         print("Welcome to Sudoku!")
+        
+    def _bye(self):
+        # TODO Animation maybe
+        print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +" seconds using " + str(self.game.hint_counter) + " hints!") 
+
 
     def select_user(self):
         """selects the user, with or without a password
@@ -87,26 +93,34 @@ class UI:
 
             print("Invalid Input, please try again!")
 
+    def show_current_state(self):
+        UI.clear()
+        print(self.game.get_current_state())
+
     def _show_input_options_pre_game():
         print("The following are all the input options before the game:\
             \n[n]: Start a new sudoku game \
-            \n[d]: Set the difficulty (easy, medium, hard). The default is hard.\
+            \n[d]: Set the difficulty (easy, medium, hard). The default is easy.\
             \n[s]: Set size of sudoku. The default is 9.\
             \n[p]: Set player. \
             \n[o]: Open game from file. \
             \n[h]: Show all high scores \
             \n[r]: Show rules of sudoku \
-            ")
+            \n-------------------------------------------------------------------------------")
 
-    def _show_input_options_during_game(self):
+    def _show_input_options_during_game():
         print("The following are all the input options during the game:\
             \n[r]: Show rules of sudoku \
-            \n[h]: Give me a Hint \
+            \n[h]: Give me a hint \
             \n[c]: Type in Coordinates and value for Input \
             \n[w]: Show wrong fields \
-            \n[s]: Save the game")
+            \n[s]: Save the game \
+            \n-------------------------------------------------------------------------------")
+    def show_blinking_input_signal():
+        # >>> blinking
+        pass
 
-    def choose_input_options_pre_game():
+    def choose_input_options_pre_game(self):
         while True:
             UI._show_input_options_pre_game()
             user_input = input().strip().lower()
@@ -124,24 +138,30 @@ class UI:
             elif user_input == "d":
                 pass #TODO set difficulty
             elif user_input == "n":
-                pass #TODO start new game
+                self.game.run()
             else:
                 print("Not a valid input!")
     
-    def _show_input_options_during_game():
+    def choose_input_options_during_game(self):
         while True:
             UI._show_input_options_during_game()
             user_input = input().strip().lower()
             
             if user_input == "r":
-                return UI.show_rules()
+                UI.show_rules()
+                return True
             elif user_input == "h":
+                self.game.hint_counter += 1
+                UI.clear()
+                print(self.game.sudoku.show_and_set_hint())
+                return False
                 pass #TODO give hint
             elif user_input == "c":
                 #TODO coordinates input
-                x, y = UI.input_coordinates()
-                UI.input_value(x, y)
-                return user_input
+                x, y = self.get_coordinates()
+                value = self.get_value()
+                self._set_value(x,y,value)
+                return False
             elif user_input == "s":
                 pass #TODO save game
             elif user_input == "w":
@@ -149,15 +169,15 @@ class UI:
             else:
                 print("Not a valid input!")
 
-    def input_coordinates(self):
+    def get_coordinates(self) -> tuple[int,int]:
         is_valid = False
         while not is_valid:
             try:
-                x = int(input("Type in x coordinate (0-8): ").strip())
-                y = int(input("Type in y coordinate (0-8): ").strip())
-                if not self.current_game.sudoku.is_valid_coordinate(x, y):
+                x = int(input("Type in x coordinate (0-" + str(self.game.sudoku.size - 1) +"):\t ").strip())
+                y = int(input("Type in y coordinate (0-" + str(self.game.sudoku.size - 1) +"):\t ").strip())
+                if not self.game.sudoku.is_valid_coordinate(x, y):
                     print("Oh no! This coordinate is not valid!")
-                elif not Sudoku.is_empty(self.copy_sudoku, x, y):
+                elif not Sudoku.is_empty(self.game.copy_sudoku, x, y):
                     print("Oh no! This field is already prefilled!")
                 else:
                     is_valid = True
@@ -165,27 +185,25 @@ class UI:
             except ValueError as ve:
                 print("Invalid input: " + ve + ". Please try again.")
 
-    def input_value(self, x, y):
+    def get_value(self) -> int:
         is_valid = False
         while not is_valid:
             try:
-                value = int(input("Type in the value (1-9) or 0 to empty it: ").strip())
-                if self.current_game.sudoku.is_valid_value(value):
-                    self.current_game.sudoku.set(x, y, value)
-                    print("The value was set successfully!")
-                    Game.clear()
-                    print(
-                        self.current_game.sudoku.show_and_set_value(
-                            x, y, value, Colors.YELLOW
-                        )
-                    )
-                    return True
-                else:
+                value = int(input("Type in the value (1-" + str(self.game.sudoku.size) +") or 0 to empty it:\t ").strip())
+                is_valid = self.game.sudoku.is_valid_value(value)
+                if not is_valid:
                     print("Oh no! This value is not valid. Please try again.")
             except ValueError:
                 print(
                     "Invalid input. Please enter a number between 1 and 9, or 0 to empty the cell."
                 )
+        return value        
+        
+    def _set_value(self,x,y,value):
+        self.game.sudoku.set(x, y, value)
+        print("The value was set successfully!")
+        UI.clear()
+        print(self.game.sudoku.show_and_set_value(x, y, value, Colors.YELLOW))
 
     def show_rules():
         print("Sudoku is a number puzzle played normally on a 9x9 grid, which is divided into 9 smaller 3x3 subgrids. The objective is to fill the grid with numbers from 1 to 9, following three main rules: \
@@ -193,10 +211,10 @@ class UI:
             \n- Column Rule: Each column must also contain all the numbers from 1 to 9 without repetition. \
             \n- Subgrid Rule: Each of the nine 3x3 subgrids must contain all the numbers from 1 to 9 without repetition. \
             \nThe puzzle starts with some numbers already filled in, and the goal is to complete the grid while adhering to these rules.")
-
+        input("Type in enter to proceed!")
 
     def display(self):
-        print(self.current_game.sudoku)
+        print(self.game.sudoku)
 
     def select_password(self):
         print("Do you want to add a Password?")
@@ -234,6 +252,12 @@ class UI:
                 return Difficulty.HARD
             print("Please select one of [e, m, h]!")
 
+
+    def clear():
+        # TODO if we want to have a clearing function like this we have to move it to user_interface class
+        from os import system, name
+        if name == 'nt': system('cls') # windows
+        else: system('clear') # mac and linux, 'posix'
 
 if __name__ == "__main__":
 

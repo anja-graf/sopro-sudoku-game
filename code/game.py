@@ -17,7 +17,7 @@ class Game:
     Note that a few required methods were renamed or put into other classes for better clarity and distribution.
     """
 
-    def __init__(self, size: int = 9, difficulty = Difficulty.EASY):
+    def __init__(self, size: int = 9, difficulty:Difficulty = Difficulty.EASY, ui = ...):
         """
         The init method in the game class will create a new game session and call the constructor in the Sudoku class. 
         The number of players in Sudoku is always one, therefore the only parameters here will be 
@@ -30,7 +30,7 @@ class Game:
         self.copy_sudoku = Sudoku._deep_copy(self.sudoku.values) 
         self.player = None
         self.hint_counter = 0
-        
+        self.ui = ui
         self.time_start = None
         self.time_length = None
 
@@ -66,58 +66,12 @@ class Game:
         but that should not happen since the program should be able to automatically generate new, and always solvable Sudoku fields.'''
         pass
 
-    def step(self) -> bool :
+    def step(self):
         '''One player input in a Sudoku cell, which is in the default Sudoku a number between 1 and 9. 
         Also the player should have the possibility to erase his own previous inputs. 
-        The return value represents if the step was valid and successful.'''
-    
-    
-        # TODO call user-interface function e.g. get_input()
-        # that can separate different game choices (hint, own coordinate_input, show wrong fields,...) 
-        # It can return a string representing that choice or, what I would prefer, an enumeration value
-        hint = input()
-        if hint == "h" or hint == "hint":
-            self.hint_counter += 1
-            Game.clear()
-            print(self.sudoku.show_and_set_hint())
-            return True
-        
-        
-        # TODO call user-interface function e.g. x,y = get_coordinates() -> int,int 
-        # that reads in coordinates and has at least the functionality like following:
-        
-        is_valid = False
-        while not is_valid:
-            # TODO outsource improved version of this in user interface class with error handling
-            x = int(input("Type in x coordinate!\t"))
-            y = int(input("Type in y coordinate!\t"))
-            
-            if not self.sudoku.is_valid_coordinate(x,y):
-                print("Oh no! This coordinate is not valid!")
-            elif not Sudoku.is_empty(self.copy_sudoku,x,y):
-                print("Oh no! This field is already prefilled!")
-            else:
-                is_valid = True
-                
-                
-        # TODO call user-interface function e.g. value = get_value() -> int
-        # that reads in a value that should be placed in given coordinates
-        # and has at least the functionality like following:
-                
-        is_valid = False
-        while not is_valid:
-            # TODO outsource improved version of this in user interface class 
-            value = int(input("Type in the value or 0 to empty it\t"))
-            is_valid = self.sudoku.is_valid_value(value)
-            if not is_valid:
-                print("Oh no! This value is not valid!")
-        self.sudoku.set(x,y,value)
-        print("The value was set successfully!")
-        
-        Game.clear()
-        print(self.sudoku.show_and_set_value(x,y,value,Colors.YELLOW))
-        return True
-        
+        '''
+        if self.ui.choose_input_options_during_game():
+            self.ui.show_current_state()
 
     def get_current_state(self) -> Sudoku: 
         '''Returns the current Sudoku field of the game session.'''
@@ -128,25 +82,14 @@ class Game:
         Note that this method should be called from the user_interface. Previously the player 
         should have gotten a welcome and instructions on how to play.
         '''
-        Game.clear()
-        print("Welcome!") # TODO delete as soon as implemented and call function that prints a welcome instead
         self.start_timer()
-        print(self.get_current_state())
-        print("Type in 'h' or 'hint' for a hint\t") # TODO print out instructions
+        self.ui.show_current_state()
         while not self.is_finished():
             self.step()
-            print("Type in 'h' or 'hint' for a hint\t") # TODO print out instructions
         self.stop_timer()
-        print("Congratulations, you finished the sudoku within " + str(self.time_length) +" seconds using " + str(self.hint_counter) + " hints!") 
-        # TODO delete as soon as implemented
+        self.ui._bye()
         self.finish_game()
         
-    
-    def clear():
-        # TODO if we want to have a clearing function like this we have to move it to user_interface class
-        from os import system, name
-        if name == 'nt': system('cls') # windows
-        else: system('clear') # mac and linux, 'posix'
 
 
 if __name__ == "__main__":
