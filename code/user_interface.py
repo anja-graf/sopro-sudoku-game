@@ -7,7 +7,7 @@
 # Software Assignment                #
 ######################################
 
-from sudoku import Sudoku, Difficulty, Colors
+from sudoku import *
 from game import Game
 from player import Player
 from persistence import Persistence
@@ -25,21 +25,24 @@ class UI:
         Creates a new user interface. Think about which pieces of information you need at this time
         (e.g. players, game mode, time limit, ...) and add them as arguments.
         """
-        self.persistence = None
         self.current_game = None
-        self.name = ""
-        self.password = ""
+        self.player = None
+        UI._welcome()
+        UI.choose_input_options_pre_game()
+
+    def _welcome():
+        # TODO Animation maybe
+        print("Welcome to Sudoku!")
 
     def select_user(self):
         """selects the user, with or without a password
         """
 
-        print("Hello and Welcome to Sudoku: ")
         print("Who are you?")
-        s = input().strip()
+        user_input = input().strip()
         self.name = s
         print("Hello" + s)
-        if s in self.persistence.data:
+        if user_input in self.persistence.data:
             print(
                 "Welcome back\nYou have played: "
                 + len(self.persistence.data[s])
@@ -59,12 +62,12 @@ class UI:
             print("[n] New Game")
             print("[c] Continue")
             print("[e] Exit")
-            s = input().strip().lower()
-            if s == "e":
+            user_input = input().strip().lower()
+            if user_input == "e":
                 print("Good bye! See you soon")
                 return False
 
-            elif s == "n":
+            elif user_input == "n":
                 # json file geöffnet bzw eine neue datei erstellt
                 self.persistence = Persistence("data.json")
 
@@ -76,7 +79,7 @@ class UI:
 
                 self.game = Game(size=self.size, difficulty=self.difficulty)
 
-            elif s == "c":
+            elif user_input == "c":
                 if Persistence.load_game() == None:
                     print("Looks like theres no game to continue :(")
                 g = Persistence.load_game()
@@ -84,57 +87,65 @@ class UI:
 
             print("Invalid Input, please try again!")
 
-    def choose_input(self):
-        """_summary_
+    def _show_input_options_pre_game():
+        print("The following are all the input options before the game:\
+            \n[n]: Start a new sudoku game \
+            \n[d]: Set the difficulty (easy, medium, hard). The default is hard.\
+            \n[s]: Set size of sudoku. The default is 9.\
+            \n[p]: Set player. \
+            \n[o]: Open game from file. \
+            \n[h]: Show all high scores \
+            \n[r]: Show rules of sudoku \
+            ")
 
-        Returns:
-            str: the input as a string (i, h, p, w, s, c, e)
-            h, w, s should be handled in game class
-            i, p, c, e is handled in ui class
-        """
+    def _show_input_options_during_game(self):
+        print("The following are all the input options during the game:\
+            \n[r]: Show rules of sudoku \
+            \n[h]: Give me a Hint \
+            \n[c]: Type in Coordinates and value for Input \
+            \n[w]: Show wrong fields \
+            \n[s]: Save the game")
 
-        print("What do you want to do?")
+    def choose_input_options_pre_game():
         while True:
-            print("[i]: Show Instructions")
-            print("[h]: Give me a Hint")
-            print("[p]: Play the game and type in Coordinates and Value for Input")
-            print("[w]: Show wrong fields")
-            print("[s]: Show Highscores")
-            print("[c]: Clear the terminal")
-            print("[e]: Exit the game")
-            s = input().strip().lower()
+            UI._show_input_options_pre_game()
+            user_input = input().strip().lower()
 
-            if s == "i":
-                self.give_instruction()
-                return s
+            if user_input == "r":
+                return UI.show_rules()
+            elif user_input == "h":
+                pass #TODO show high scores
+            elif user_input == "o":
+                pass #TODO open game from file
+            elif user_input == "p":
+                pass #TODO set player
+            elif user_input == "s":
+                pass #TODO set size
+            elif user_input == "d":
+                pass #TODO set difficulty
+            elif user_input == "n":
+                pass #TODO start new game
+            else:
+                print("Not a valid input!")
+    
+    def _show_input_options_during_game():
+        while True:
+            UI._show_input_options_during_game()
+            user_input = input().strip().lower()
             
-            elif s == "h":
-                return s
-                
-            elif s == "p":
-                x, y = self.input_coordinates()
-                self.input_value(x, y)
-                return s
-
-            elif s == "w":
-                return s
-
-            elif s == "s":
-                return s
-
-            elif s == "c":
-                from os import system, name
-
-                if name == "nt":
-                    system("cls")  # windows
-                else:
-                    system("clear")  # mac and linux, 'posix'
-                return s    
-
-            elif s == "e":
-                print("Good bye! See you soon")
-                return s
-
+            if user_input == "r":
+                return UI.show_rules()
+            elif user_input == "h":
+                pass #TODO give hint
+            elif user_input == "c":
+                #TODO coordinates input
+                x, y = UI.input_coordinates()
+                UI.input_value(x, y)
+                return user_input
+            elif user_input == "s":
+                pass #TODO save game
+            elif user_input == "w":
+                pass #TODO show wrong fields
             else:
                 print("Not a valid input!")
 
@@ -176,17 +187,13 @@ class UI:
                     "Invalid input. Please enter a number between 1 and 9, or 0 to empty the cell."
                 )
 
-    @staticmethod
-    def give_instruction():
-        print("Instructions:")
-        print("How to play Sudoku:")
-        print("Sudoku has a 9x9 grid, divided into 9 smaller 3x3 boxes.")
-        print(
-            "Fill the grid so each row, column, and 3x3 box contains the numbers 1 through 9 without repetition."
-        )
-        print("A number can appear only once in each row.")
-        print("A number can appear only once in each column.")
-        print("A number can appear only once in each 3x3 box.\n")
+    def show_rules():
+        print("Sudoku is a number puzzle played normally on a 9x9 grid, which is divided into 9 smaller 3x3 subgrids. The objective is to fill the grid with numbers from 1 to 9, following three main rules: \
+            \n- Row Rule: Each row must contain all the numbers from 1 to 9 without repetition. \
+            \n- Column Rule: Each column must also contain all the numbers from 1 to 9 without repetition. \
+            \n- Subgrid Rule: Each of the nine 3x3 subgrids must contain all the numbers from 1 to 9 without repetition. \
+            \nThe puzzle starts with some numbers already filled in, and the goal is to complete the grid while adhering to these rules.")
+
 
     def display(self):
         print(self.current_game.sudoku)
@@ -200,12 +207,12 @@ class UI:
                 return ""
             print("Please enter you password: ")
             if answer == "y":
-                s = input()
+                user_input = input()
                 return s
 
     def select_size():
         #TODO 
-        s = input()
+        user_input = input()
 
 
     def select_difficulty(self):
@@ -218,12 +225,12 @@ class UI:
         print("Select your difficulty")
         while True:
             print("[e] : Easy\n[m] : medium\n[h] : hard")
-            s = input().strip().lower()
-            if s == "e":
+            user_input = input().strip().lower()
+            if user_input == "e":
                 return Difficulty.EASY
-            elif s == "m":
+            elif user_input == "m":
                 return Difficulty.MEDIUM
-            elif s == "h":
+            elif user_input == "h":
                 return Difficulty.HARD
             print("Please select one of [e, m, h]!")
 
@@ -234,6 +241,4 @@ if __name__ == "__main__":
     write additional testing code here for things that don't work well as unit tests:
     """
     ui = UI()
-    ui.select_user()
-
-    ...
+    UI.show_rules()
