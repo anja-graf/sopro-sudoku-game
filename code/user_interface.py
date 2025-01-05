@@ -120,13 +120,19 @@ class UI:
             \n[h]: Give me a hint \
             \n[c]: Type in Coordinates and value for Input \
             \n[w]: Show wrong fields \
-            \n[s]: Save the game \
+            \n[s]: Save the game and quit \
             \n-------------------------------------------------------------------------------")
     
     def _show_input_options_during_coordinates_values_input():
         print("Please navigate to the desired field (by pressing arrow keys ↑,↓,→,←) and enter the number (1-9) you want to fill in. Your cursor is at the blinking cell.\
             \nTo empty a cell enter 0.\
             \nTo leave this menu enter escape key.\
+            \n-------------------------------------------------------------------------------")
+    
+    def _show_input_options_save_game(name:str,path:str):
+        print("[s]: Save the game and quit \
+            \n[f]: Change the current filename [" + str(name) + "] \
+            \n[p]: Change the current filepath [" + str(path) + "] \
             \n-------------------------------------------------------------------------------")
     
     def show_blinking_input_signal():
@@ -155,7 +161,7 @@ class UI:
             else:
                 print("Not a valid input!")
     
-    def choose_input_options_during_game(self):
+    def choose_input_options_during_game(self) -> bool:
         while True:
             UI._show_input_options_during_game()
             user_input = input().strip().lower()
@@ -184,7 +190,14 @@ class UI:
                 self._set_value(x,y,value)
                 return False
             elif user_input == "s":
-                pass #TODO save game
+                # TODO give option to select filename and path
+                name, path = self.get_filename_and_path()
+                self.game.name = name
+                self.game.time_length += self.game.measure_time_needed()
+                Persistence.save_game(self.game,path)
+                print("The game [" + name + "] was successfully saved at [" + path + "]. \
+                    \nGoodbye, thanks for playing sudoku!")
+                exit()
             elif user_input == "w":
                 pass #TODO show wrong fields & print important notes for using
             else:
@@ -251,7 +264,21 @@ class UI:
         UI.flush()
         return None,None,None
         
-        
+    def get_filename_and_path(self) -> tuple[str,str]:
+        #TODO Docstring
+        user_input = ""
+        path = Persistence.get_current_dir()
+        name = self.game.name
+        while user_input != "s":
+            UI._show_input_options_save_game(name,path)
+            user_input = input().strip().lower()
+            if user_input == "f":
+                name = input("Enter a file name!\n")
+            elif user_input == "p":
+                temp_path = input("Enter a file path!\n")
+                if Persistence.check_path(temp_path): path = temp_path
+                else: print("The path could not be changed, because it would be invalid!")
+        return name,path
 
     def get_value(self) -> int:
         is_valid = False

@@ -10,6 +10,7 @@
 from player import Player
 from sudoku import *
 import time
+import datetime as dt
 
 class Game:
     """
@@ -34,7 +35,7 @@ class Game:
         self.time_start = None
         self.time_length = 0
         
-        self.name = None
+        self.name = "Sudoku Game " + str(dt.datetime.now())
 
     def start_timer(self):
         """This is a helper method to start a timer a soon as a Game is created."""
@@ -68,12 +69,12 @@ class Game:
         but that should not happen since the program should be able to automatically generate new, and always solvable Sudoku fields.'''
         pass
 
-    def step(self):
+    def step(self) -> bool:
         '''One player input in a Sudoku cell, which is in the default Sudoku a number between 1 and 9. 
         Also the player should have the possibility to erase his own previous inputs. 
         '''
-        if self.ui.choose_input_options_during_game():
-            self.ui.show_current_state()
+        status = self.ui.choose_input_options_during_game() 
+        if status: self.ui.show_current_state()
 
     def get_current_state(self) -> Sudoku: 
         '''Returns the current Sudoku field of the game session.'''
@@ -86,7 +87,7 @@ class Game:
         '''
         self.start_timer()
         self.ui.show_current_state()
-        while not self.is_finished(): # TODO or save and exit game
+        while not self.is_finished():
             self.step()
         self.time_length += self.measure_time_needed()
         self.ui._bye()

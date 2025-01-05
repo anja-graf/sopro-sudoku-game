@@ -71,7 +71,7 @@ class Persistence:
         """
         if game.name is None:
             game.name = "Sudoku Game " + str(dt.datetime.now())
-        with open(path + game.name,"w") as f:
+        with open(os.path.join(path,game.name),"w") as f:
             content = "Sudoku Game from " + str(dt.datetime.now())
             if game.player is not None:
                 content += ", played by " + game.player.name    
@@ -82,6 +82,7 @@ class Persistence:
             f.write(content)
     
     def load_game(path:str) -> Game:
+        #TODO Tests and Docstring, maybe validation code that checks if anything was manipulated
         game = Game()
         sudoku = None
         with open(path,"r") as f:
@@ -131,9 +132,22 @@ class Persistence:
             json.dump(self.data, json_data)
         pass
     
+    def check_path(path:str) -> bool:
+        return os.path.exists(path) and os.path.isdir(path)
+    
+    def check_filepath(path:str) -> bool:
+        return os.path.exists(path) and os.path.isfile(path)
+
+    def get_current_dir() -> str:
+        return os.getcwd()
+    
 # g = Game()
 # #g.player = Player(name="testPlayername")
 # g.time_length = 2
 # Persistence.save_game(g,"/home/anja/Dokumente/")
 
-Persistence.load_game("/home/anja/Dokumente/Sudoku Game 2025-01-05 18:30:55.260268")
+#Persistence.load_game("/home/anja/Dokumente/Sudoku Game 2025-01-05 18:30:55.260268")
+
+#print(Persistence.check_filepath("/home/anja/Dokumente/Sudoku Game 2025-01-05 18:30:55.260268"))
+#print(Persistence.get_current_dir())
+print(Persistence.check_path(""))
