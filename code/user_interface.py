@@ -38,7 +38,7 @@ class UI:
     def _bye(self):
         # TODO Animation maybe
         print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +" seconds using " + str(self.game.hint_counter) + " hints!") 
-
+        # TODO Save current game option
 
     def select_user(self):
         """selects the user, with or without a password
@@ -93,10 +93,14 @@ class UI:
 
             print("Invalid Input, please try again!")
 
-    def show_current_state(self):
-        UI.clear()
+    def show_current_state(self,clear:bool = True, modified:str = ...):
+        if clear:
+            UI.clear()
         print("This is the current game state:")
-        print(self.game.get_current_state())
+        if modified is ...:
+            print(self.game.get_current_state())
+        else:
+            print(modified)
 
     def _show_input_options_pre_game():
         print("The following are all the input options before the game:\
@@ -161,7 +165,11 @@ class UI:
             elif user_input == "h":
                 self.game.hint_counter += 1
                 UI.clear()
-                print(self.game.sudoku.show_and_set_hint())
+                try:
+                    print(self.game.sudoku.show_and_set_hint())
+                except Exception:
+                    print("This option should only be used if the sudoku field is solvable. Try out w!")
+                    self.show_current_state(False)
                 return False
                 pass #TODO give hint
             elif user_input == "c":
@@ -177,7 +185,7 @@ class UI:
             elif user_input == "s":
                 pass #TODO save game
             elif user_input == "w":
-                pass #TODO show wrong fields
+                pass #TODO show wrong fields & print important notes for using
             else:
                 print("'" + str(user_input) + "' is not a valid input!")
 
@@ -209,8 +217,7 @@ class UI:
         value = None
         ch = error = ''
         while ch != 'esc':
-            UI.clear()
-            print(self.game.sudoku.show_blinking_cell(x,y))
+            self.show_current_state(modified=self.game.sudoku.show_blinking_cell(x,y))
             UI._show_input_options_during_coordinates_values_input()
             if error != '':
                 print(error)
@@ -228,7 +235,6 @@ class UI:
             elif len(ch) == 1 and ch.isdigit():
                 if Sudoku.is_empty(self.game.copy_sudoku, x, y):
                     value = int(ch)
-                    #print("The value " + str(value) + " was set successfully on (" + str(x) + ", " + str(y) + ")")
                     UI.flush()
                     return x,y,value
                 error = "Oh no! This field is already prefilled!"
