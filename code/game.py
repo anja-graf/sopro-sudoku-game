@@ -32,16 +32,17 @@ class Game:
         self.hint_counter = 0
         self.ui = ui
         self.time_start = None
-        self.time_length = None
+        self.time_length = 0
+        
+        self.name = None
 
     def start_timer(self):
         """This is a helper method to start a timer a soon as a Game is created."""
         self.time_start = time.time()
 
-    def stop_timer(self):
-        """This is a helper method to measure the needed time for the sudoku."""
-        self.time_length = int(time.time() - self.time_start) # int cast to get seconds
-        del self.time_start
+    def measure_time_needed(self) -> int:
+        """This is a helper method to measure the needed time for the sudoku in seconds."""
+        return int(time.time() - self.time_start) # int cast to get seconds
         
     def set_player(self,player:Player):
         """Sets a given Player object as the player for the current game session. 
@@ -53,6 +54,7 @@ class Game:
         ''' Cleans-up code after a game session ends.'''
         # Anjas TODO Maybe invoke high score saving process or other useful functionality
         del self.sudoku
+        del self.time_start
         del self.copy_sudoku
 
     def is_finished(self) -> bool: 
@@ -84,9 +86,9 @@ class Game:
         '''
         self.start_timer()
         self.ui.show_current_state()
-        while not self.is_finished():
+        while not self.is_finished(): # TODO or save and exit game
             self.step()
-        self.stop_timer()
+        self.time_length += self.measure_time_needed()
         self.ui._bye()
         self.finish_game()
         

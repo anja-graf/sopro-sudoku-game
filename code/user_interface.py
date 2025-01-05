@@ -103,6 +103,7 @@ class UI:
             print(modified)
 
     def _show_input_options_pre_game():
+        #TODO implement input given game
         print("The following are all the input options before the game:\
             \n[n]: Start a new sudoku game \
             \n[d]: Set the difficulty (easy, medium, hard). The default is easy.\

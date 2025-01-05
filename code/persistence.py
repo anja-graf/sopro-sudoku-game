@@ -3,6 +3,8 @@ import json
 from collections import defaultdict
 from player import Player
 from game import Game
+from sudoku import *
+import datetime as dt
 
 
 class Persistence:
@@ -61,13 +63,23 @@ class Persistence:
         """
         pass
 
-    def save_game(self, game: Game):
+    def save_game(game: Game, path:str=""):
         """Saves a game.
 
         Args:
             game (Game): The game that is to be saved.
         """
-        pass
+        if game.name is None:
+            game.name = "Sudoku Game " + str(dt.datetime.now())
+        with open(path + game.name,"w") as f:
+            content = "Sudoku Game from " + str(dt.datetime.now())
+            if game.player is not None:
+                content += ", played by " + game.player.name    
+            
+            content += "\n\n" + str(game.sudoku) + \
+                    "\nNeeded time: " + str(game.time_length) + " seconds" + \
+                    "\nNeeded hints: " + str(game.hint_counter)
+            f.write(content)
 
     def save_to_json(self):
         """Writes all changes of the `data` attribute to the json file.
@@ -75,3 +87,8 @@ class Persistence:
         with open(self.filename, "w") as json_data:
             json.dump(self.data, json_data)
         pass
+    
+g = Game()
+#g.player = Player(name="testPlayername")
+g.time_length = 2
+Persistence.save_game(g,"/home/anja/Dokumente/")
