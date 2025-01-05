@@ -2,7 +2,7 @@
 # Note that keyboard module needs to be imported first and on some devices, e.g. Linux the execution requires sudo rights!
 
 import keyboard
-from game import Game
+from user_interface import UI
 import time
 from sudoku import *
 
@@ -11,10 +11,11 @@ s.create(Difficulty.EASY)
 x = 1
 y = 1
 print(s)
-Game.clear()
+UI.clear()
 print(s.show_blinking_cell(x,y))
 
 ch = keyboard.read_key()
+print(ch)
 time.sleep(0.5)
 while ch != 'enter':
      if ch == 'right':
@@ -26,7 +27,7 @@ while ch != 'enter':
      elif ch == 'down':
           x = x + 1
           
-     Game.clear()
+     UI.clear()
      print(x,y)
      if not s.is_valid_coordinate(x,y): break
      print(s.show_blinking_cell(x,y))

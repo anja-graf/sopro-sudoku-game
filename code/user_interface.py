@@ -95,6 +95,7 @@ class UI:
 
     def show_current_state(self):
         UI.clear()
+        print("This is the current game state:")
         print(self.game.get_current_state())
 
     def _show_input_options_pre_game():
@@ -116,6 +117,13 @@ class UI:
             \n[w]: Show wrong fields \
             \n[s]: Save the game \
             \n-------------------------------------------------------------------------------")
+    
+    def _show_input_options_during_coordinates_values_input():
+        print("Please navigate to the desired field (by pressing arrow keys ↑,↓,→,←) and enter the number (1-9) you want to fill in. Your cursor is at the blinking cell.\
+            \nTo empty a cell enter 0.\
+            \nTo leave this menu enter escape key.\
+            \n-------------------------------------------------------------------------------")
+    
     def show_blinking_input_signal():
         # >>> blinking
         pass
@@ -158,8 +166,12 @@ class UI:
                 pass #TODO give hint
             elif user_input == "c":
                 #TODO coordinates input
-                x, y = self.get_coordinates()
-                value = self.get_value()
+                # alternative:
+                #x, y = self.get_coordinates()
+                #value = self.get_value()
+                x,y,value = self.get_coordinates_and_values_through_navigating()
+                if x is None or y is None or value is None:
+                    return True
                 self._set_value(x,y,value)
                 return False
             elif user_input == "s":
@@ -167,7 +179,7 @@ class UI:
             elif user_input == "w":
                 pass #TODO show wrong fields
             else:
-                print("Not a valid input!")
+                print("'" + str(user_input) + "' is not a valid input!")
 
     def get_coordinates(self) -> tuple[int,int]:
         is_valid = False
@@ -184,6 +196,55 @@ class UI:
                     return x, y
             except ValueError as ve:
                 print("Invalid input: " + ve + ". Please try again.")
+
+    def get_coordinates_and_values_through_navigating(self) -> tuple[int | None,int | None,int | None]:
+        # This is a sketch for navigating through a sudoku field with arrow keys instead of coordinates
+        # Note that keyboard module needs to be imported first and on some devices, e.g. Linux the execution requires sudo rights!
+
+        import keyboard
+        import time
+
+        x = int(self.game.sudoku.size / 2) # in the middle the distance to all coordinates is minimal
+        y = x
+        value = None
+        ch = error = ''
+        while ch != 'esc':
+            UI.clear()
+            print(self.game.sudoku.show_blinking_cell(x,y))
+            UI._show_input_options_during_coordinates_values_input()
+            if error != '':
+                print(error)
+                error = ''
+            ch = keyboard.read_key()
+            time.sleep(0.2)
+            if ch == 'right':
+                y = (y + 1) % self.game.sudoku.size
+            elif ch == 'left':
+                y = (y - 1) % self.game.sudoku.size
+            elif ch == 'up':
+                x = (x - 1) % self.game.sudoku.size
+            elif ch == 'down':
+                x = (x + 1) % self.game.sudoku.size
+            elif len(ch) == 1 and ch.isdigit():
+                if Sudoku.is_empty(self.game.copy_sudoku, x, y):
+                    value = int(ch)
+                    #print("The value " + str(value) + " was set successfully on (" + str(x) + ", " + str(y) + ")")
+                    UI.flush()
+                    return x,y,value
+                error = "Oh no! This field is already prefilled!"
+            elif ch == 'esc':
+                break
+            elif ch == 'enter':
+                pass
+            else:
+                error = "That was no valid input, please try again!"
+            if not self.game.sudoku.is_valid_coordinate(x,y): 
+                raise Exception("This should never happen!")
+
+        UI.flush()
+        return None,None,None
+        
+        
 
     def get_value(self) -> int:
         is_valid = False
@@ -211,7 +272,7 @@ class UI:
             \n- Column Rule: Each column must also contain all the numbers from 1 to 9 without repetition. \
             \n- Subgrid Rule: Each of the nine 3x3 subgrids must contain all the numbers from 1 to 9 without repetition. \
             \nThe puzzle starts with some numbers already filled in, and the goal is to complete the grid while adhering to these rules.")
-        input("Type in enter to proceed!")
+        input("Type in enter to proceed!\n")
 
     def display(self):
         print(self.game.sudoku)
@@ -259,6 +320,12 @@ class UI:
         if name == 'nt': system('cls') # windows
         else: system('clear') # mac and linux, 'posix'
 
+    def flush():
+        import keyboard
+        keyboard.press_and_release('enter')
+        input("Type in enter to proceed!\n")
+        #import sys
+        #sys.stdout.flush()
 if __name__ == "__main__":
 
     """

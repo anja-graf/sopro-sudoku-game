@@ -90,7 +90,9 @@ class Game:
         self.ui._bye()
         self.finish_game()
         
-
+    def show_prefilled_values(self):
+        # TODO
+        pass
 
 if __name__ == "__main__":
     """
