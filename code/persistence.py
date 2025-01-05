@@ -17,49 +17,61 @@ class Persistence:
             filename (str): name der json datei (data.json)
         """
         self.filename = filename
-        if os.path.isfile(filename) == True:
-            with open(filename) as json_data:
+        if os.path.isfile(filename):
+            with open(filename, "r") as json_data:
                 self.data = json.load(json_data)
         else:
-            self.data = defaultdict(dict)
+            self.data = {"users": {}, "games": {}}
 
     def get_players(self) -> list[Player]:
-        """Get a list of all players
+        """Gets a list of all players.
 
         Returns:
-            list[Player]: List of `Player` instances
+            list[Player]: List of `Player` instances.
         """
-        return [Player.from_dict(player_dict) for player_dict in self.data["players"]]
+        return [Player.from_dict({"name": name, "data": data}) for name, data in self.data["users"].items()]
+
+
 
     def save_player(self, player: Player):
-        """Saves a `Player` instance. Either overrides the player if it already exists, or creates a new one.
+        """Saves a `Player` instance. Overrides the player if it already exists or creates a new one.
 
         Args:
-            player (Player): The player which is to be saved.
+            player (Player): The player to save.
         """
-        new_player_dict = player.to_dict()
-        replaced = False
-        for i, p in enumerate(self.data["players"]):
-            if p["name"] == player.name:
-                self.data["players"][i] = new_player_dict
-                replaced = True
-                break
+        self.data["users"][player.name] = player.to_dict()
 
-        if replaced == False:
-            self.data["players"].append(new_player_dict)
+        
 
     def get_games_for_player(self, player_name_: str):
-        """Gets all games for a player.
+        """Gets all games for a specific player.
 
         Args:
-            player_name (str): The players name.
+            player_name (str): The player's name.
+
+        Returns:
+            list[Game]: List of `Game` instances.
         """
-        pass
+        return [
+            Game.from_dict(game_data)
+            for game_name, game_data in self.data["games"].items()
+            if game_data["name"] == player_name_
+        ]
 
     def get_game(self, player_name, game_name):
         """Gets a game by player and game name.
+
+        Args:
+            player_name (str): The player's name.
+            game_name (str): The game's name.
+
+        Returns:
+            Game: The requested `Game` instance.
         """
-        pass
+        for game_name_, game_data in self.data["games"].items():
+            if game_name_ == game_name and game_data["name"] == player_name:
+                return Game.from_dict(game_data)
+        return None
 
     def save_game(self, game: Game):
         """Saves a game.
@@ -67,11 +79,16 @@ class Persistence:
         Args:
             game (Game): The game that is to be saved.
         """
-        pass
+        self.data["games"][game.name] = game.to_dict()
 
     def save_to_json(self):
         """Writes all changes of the `data` attribute to the json file.
         """
         with open(self.filename, "w") as json_data:
             json.dump(self.data, json_data)
-        pass
+        
+
+if __name__ == "main":
+    per = Persistence("data.json")
+    print(per.get_players())
+
