@@ -490,6 +490,8 @@ class Sudoku(object):
 
     def _get_a_hint(self, generate_new_solution: bool = False) -> tuple[int, int, int]:
         """Returns the value of an empty field according to the following pattern: (x, y, value)
+            If generate_new_solution is set to True, this will be passed further to the 'solve()' 
+            method and there will be generated a new solution.
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
@@ -527,7 +529,7 @@ class Sudoku(object):
         True
         """
         return self.show_and_set_value(
-            *self._get_a_hint(), highlighted_color=Colors.CYAN
+            *self._get_a_hint(generate_new_solution=True), highlighted_color=Colors.CYAN
         )
 
     def show_and_set_value(
@@ -595,11 +597,15 @@ class Sudoku(object):
         >>> "\x1b[91m5\x1b[0m" in s.show_wrong_fields() # Note that the expression in quotation marks is a red 5 (also noticeable in the tests output)
         True
         """
-        wrong_fields = self._get_wrong_fields()
+        # If generate_new_solution was set to True an exception could be thrown, 
+        # because the user can set wrong values which lead to an unsolvable sudoku field
+        wrong_fields = self._get_wrong_fields(generate_new_solution=False)
         return self.__str__(wrong_fields, Colors.RED)
 
     def _get_wrong_fields(self, generate_new_solution: bool = False) -> list[list[int]]:
         """Compares current values to one possible solution and returns a field containing every different number
+            If generate_new_solution is set to True, this will be passed further to the 'solve()' 
+            method and there will be generated a new solution.
 
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
