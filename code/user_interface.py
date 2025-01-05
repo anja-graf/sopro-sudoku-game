@@ -149,7 +149,14 @@ class UI:
             elif user_input == "h":
                 pass #TODO show high scores
             elif user_input == "o":
-                pass #TODO open game from file
+                path = self.get_path(file=True)
+                try:
+                    self.game = Persistence.load_game(path)
+                    self.game.ui = self
+                except Exception as e:
+                    print(Colors.RED.value + "This file could not be loaded:" + str(e) + Colors.END.value + "\n\n")
+                    continue
+                self.game.run()
             elif user_input == "p":
                 pass #TODO set player
             elif user_input == "s":
@@ -275,10 +282,18 @@ class UI:
             if user_input == "f":
                 name = input("Enter a file name!\n")
             elif user_input == "p":
-                temp_path = input("Enter a file path!\n")
-                if Persistence.check_path(temp_path): path = temp_path
-                else: print("The path could not be changed, because it would be invalid!")
+                path = self.get_path()
         return name,path
+
+    def get_path(self,file=False) -> str:
+        s = ""
+        if file: s = "Enter a file path!\n"
+        else: s = "Enter a path!\n"
+        while True:
+            path = input(s)
+            if file and Persistence.check_filepath(path): return path
+            if not file and Persistence.check_path(path): return path
+            else: print("The path is invalid!")
 
     def get_value(self) -> int:
         is_valid = False
@@ -366,4 +381,3 @@ if __name__ == "__main__":
     write additional testing code here for things that don't work well as unit tests:
     """
     ui = UI()
-    UI.show_rules()

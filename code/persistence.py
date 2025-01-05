@@ -120,10 +120,10 @@ class Persistence:
         return values
 
     def _decode_time(content:str) -> int:
-        return content[len("Needed time: "):content.find("seconds")]
+        return int(content[len("Needed time: "):content.find("seconds")])
         
     def _decode_hints(content:str) -> int:
-        return content[len("Needed hints: "):]
+        return int(content[len("Needed hints: "):])
 
     def save_to_json(self):
         """Writes all changes of the `data` attribute to the json file.
