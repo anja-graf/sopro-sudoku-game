@@ -255,10 +255,13 @@ class Sudoku(object):
         """
         return 0 <= x and x < self.size and 0 <= y and y < self.size
 
-    def solve(self):
+    def solve(self, generate_new_solution: bool = False):
         """Returns solution that was created in the 'create()' method after '_generate()' and before '_remove_numbers()',
         if it exists. Otherwise a backtracking algorithm solves given Sudoku or throws an exception in case the sudoku
-        is not solvable.
+        is not solvable. 
+        Additionally, if generate_new_solution is set to True, there will be always generated a new solution, which 
+        will be based on the current values. This can be relevant if there are multiple solutions to the generated 
+        sudoku.
         After calling this method the solution will be saved in the 'self.solution' attribute and the 'self.values'
         parameter will stay the same.
 
@@ -276,7 +279,7 @@ class Sudoku(object):
             ...
         Exception: Oh no! Seems like this Sudoku is unsolvable :(
         """
-        if self.solution:
+        if self.solution and not generate_new_solution:
             return
         if self.is_solved():
             # The self.values attribute already is a solution, so everything left to do is to copy it to self.solution
@@ -485,7 +488,7 @@ class Sudoku(object):
         """
         self.set(x, y, 0)
 
-    def _get_a_hint(self) -> tuple[int, int, int]:
+    def _get_a_hint(self, generate_new_solution: bool = False) -> tuple[int, int, int]:
         """Returns the value of an empty field according to the following pattern: (x, y, value)
 
         >>> s = Sudoku()
@@ -502,7 +505,7 @@ class Sudoku(object):
             ...
         Exception: The Sudoku is already solved!
         """
-        self.solve()
+        self.solve(generate_new_solution)
         if self.is_solved():
             raise Exception("The Sudoku is already solved!")
         pos_x = randint(0, self.size - 1)
@@ -595,7 +598,7 @@ class Sudoku(object):
         wrong_fields = self._get_wrong_fields()
         return self.__str__(wrong_fields, Colors.RED)
 
-    def _get_wrong_fields(self) -> list[list[int]]:
+    def _get_wrong_fields(self, generate_new_solution: bool = False) -> list[list[int]]:
         """Compares current values to one possible solution and returns a field containing every different number
 
         >>> s = Sudoku()
@@ -606,7 +609,7 @@ class Sudoku(object):
         >>> wrong_fields[0][0] != 0 or wrong_fields[0][1] != 0
         True
         """
-        self.solve()
+        self.solve(generate_new_solution)
         wrong_fields = []
         for row in range(0, self.size):
             value_row = []
