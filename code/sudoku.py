@@ -2,6 +2,7 @@ from random import sample, randint
 from enum import Enum
 from collections.abc import Sequence
 from typing import LiteralString
+from colors import Colors
 
 
 class Difficulty(Enum):
@@ -10,31 +11,6 @@ class Difficulty(Enum):
     EASY = 1
     MEDIUM = 2
     HARD = 3
-
-
-class Colors(Enum):
-    """
-    This Enumeration collects some well chosen ansi escape sequences for graphic rendition
-    parameters using control sequence introducer commands to generate colored output in console,
-    like described in: https://en.wikipedia.org/wiki/ANSI_escape_code
-    """
-
-    WHITE = "\033[97m"
-    CYAN = "\033[96m"
-    PURPLE = "\033[95m"
-    BLUE = "\033[94m"
-    YELLOW = "\033[93m"
-    GREEN = "\033[92m"
-    RED = "\033[91m"
-    GREY = "\033[90m"
-    CROSSED = "\033[9m"
-    INVERTED = "\033[7m"
-    BLINKING = "\033[5m"
-    UNDERLINE = "\033[4m"
-    ITALIC = "\033[3m"
-    BOLD = "\033[1m"
-    END = "\033[0m"
-
 
 class Sudoku(object):
     """Represents the players' sudoku field

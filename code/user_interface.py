@@ -11,6 +11,7 @@ from sudoku import *
 from game import *
 from player import Player
 from persistence import Persistence
+from colors import Colors
 
 
 class UI:
