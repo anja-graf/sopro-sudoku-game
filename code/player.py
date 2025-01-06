@@ -14,6 +14,8 @@ class Player:
 
     def __init__(self, name, password=None, password_hash=None):
         self.name = name
+        self.password = password
+        self.password_hash = password_hash
         if password != None:
             self.password_hash = Player.get_password_hash(password)
         elif password_hash != None:
@@ -32,13 +34,28 @@ class Player:
         """
         if self.password_hash == None:
             return True
-
         return self.password_hash == Player.get_password_hash(password)
 
     def to_dict(self) -> dict:
         """Transforms the player data into a dictionary.
         """
         return {"name": self.name, "password_hash": self.password_hash}
+    
+    def has_password(self) -> bool:
+        """Returns whether the Player has a password
+
+        Returns:
+            bool: Whether the Player has a password
+        """
+        return self.password != None or self.password_hash != None
+    
+    def __str__(self) -> str:
+        """Returns a string representation of the Player
+
+        Returns:
+            str: The players name
+        """
+        return self.name
 
     @staticmethod
     def from_dict(player_dict):
@@ -57,5 +74,5 @@ if __name__ == '__main__':
     '''
     write additional testing code here for things that don't work well as unit tests:
     '''
-    player1 = Player('Yoshi')  # create new player
-    player2 = Player('Peach')  # create new player
+    player1 = Player('Yoshi')
+    player2 = Player('Peach', password="I like mushrooms")

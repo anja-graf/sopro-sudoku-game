@@ -26,10 +26,10 @@ class UI:
         Creates a new user interface. Think about which pieces of information you need at this time
         (e.g. players, game mode, time limit, ...) and add them as arguments.
         """
-        self.persistence = None
+        self.persistence = Persistence()
         self.current_game = None
         self.name = ""
-        self.password = ""
+        self.select_user()
 
     def select_user(self):
         """Selects an existing user or creates a new one.
@@ -41,49 +41,47 @@ class UI:
 
         print("Hello and Welcome to Sudoku: ")
         print("Who are you?")
-        s = input().strip()
-        self.name = s
-        print("Hello" + s)
-        if s in self.persistence.data["users"]:
-            games_played = sum(
-            1 for game in self.persistence.data["games"].values() if game["name"] == s)
+        player_name = input().strip()
+        self.name = player_name
+        print(f"Hello {player_name}!")
+        if player_name in self.persistence.data["users"]:
+            hash = self.input_and_validate_password()
+            self.player = Player(self.name, password_hash=hash)
+            games_played = len(self.persistence.get_games_for_player(player_name))
             print(f"Welcome back! You have played: {games_played} games.")
-            self.type_and_validate_password()
-
         else:
-            print("Welcome " + s)
-            self.persistence.data["users"][s] = ""
-            self.password = self.select_password()
-            self.player = Player(self.name, self.password)
+            password = self.select_password()
+            self.player = Player(self.name, password=password)
+            self.persistence.save_player(self.player)
             print(f"New player created: {self.player}")
 
-    def type_and_validate_password(self):
+    def input_and_validate_password(self):
         """
-    Prompts the user to input their password and validates it.
+        Prompts the user to input their password and validates it.
 
-    This method ensures that the user enters the correct password to proceed. 
-    If the password is correct, the user is logged in. If the password is incorrect, 
-    the user is prompted to try again.
+        This method ensures that the user enters the correct password to proceed. 
+        If the password is correct, the user is logged in. If the password is incorrect, 
+        the user is prompted to try again.
 
-    Args:
-        None
+        Args:
+            None
 
-    Returns:
-        bool: Returns `True` if the password is correct, allowing the user to proceed. 
-        Keeps prompting the user if the password is incorrect.
-    """
+        Returns:
+            str: Returns a string representation of the password hash if the password is correct, allowing the user to proceed. 
+            Keeps prompting the user if the password is incorrect.
+        """
+        saved_player = self.persistence.get_players()[self.name]
+        if not saved_player.has_password():
+            return None
         while True:
-            if self.persistence.data["users"].get(self.name, "") != "":
                 print("Please type in your Password")
-                p = input()
-                if Player.validate_credentials(self.name, p) == True:
+                password = input()
+                if saved_player.validate_credentials(password):
                     print("You are now logged in")
-                    return True
+                    return Player.get_password_hash(password)
                 print("You have typed in the wrong password")
-                    
 
     def select_game(self):
-
         """
         Allows the user to select the type of game action they want to perform.
 
@@ -278,19 +276,19 @@ class UI:
             None
 
         Returns:
-        str: The user's password, or an empty string if no password is set.
+            str: The user's password, or an empty string if no password is set.
         """
-
-
-        print("Do you want to add a Password?")
+        print("Do you want to add a password?")
         while True:
             print("[y] : Yes [n] : No")
             answer = input().strip().lower()
             if answer == "n":
-                return ""
+                return None
             print("Please enter you password: ")
             if answer == "y":
-                s = input()
+                s = input().strip()
+                if len(s) <= 0:
+                    return None
                 return s
 
     def select_size():
@@ -339,6 +337,3 @@ if __name__ == "__main__":
     write additional testing code here for things that don't work well as unit tests:
     """
     ui = UI()
-    ui.select_user()
-
-    ...
