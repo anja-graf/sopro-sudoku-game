@@ -160,7 +160,9 @@ class UI:
             elif user_input == "p":
                 pass #TODO set player
             elif user_input == "s":
-                pass #TODO set size
+                pass #TODO set size like 
+                #self.game = Game(size=16,ui=self)
+                #self.game.run()
             elif user_input == "d":
                 pass #TODO set difficulty
             elif user_input == "n":
