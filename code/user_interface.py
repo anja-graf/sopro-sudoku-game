@@ -175,7 +175,9 @@ class UI:
         while True:
             UI._show_input_options_during_game()
             user_input = input().strip().lower()
-            
+            ascii_escape_decimal = 27 # Bug fix, do not remove
+            while user_input == "" or ord(user_input[0]) == ascii_escape_decimal:
+                user_input = input().strip().lower()
             if user_input == "r":
                 UI.show_rules()
                 return True
@@ -222,7 +224,7 @@ class UI:
                 #TODO print important notes for using
                 return False
             else:
-                print("'" + str(user_input) + "' is not a valid input!")
+                print("test" + str(user_input) + "test is not a valid input!")
 
     def get_coordinates(self) -> tuple[int,int]:
         is_valid = False
@@ -258,6 +260,7 @@ class UI:
                 print(error)
                 error = ''
             ch = keyboard.read_key()
+            print(ch)
             time.sleep(0.2)
             if ch == 'right':
                 y = (y + 1) % self.game.sudoku.size
@@ -275,7 +278,12 @@ class UI:
                 error = "Oh no! This field is already prefilled!"
             elif ch == 'esc':
                 break
-            elif ch == 'enter':
+            elif ch == 'enter' or "backspace":
+                while keyboard.is_pressed("enter") or keyboard.is_pressed("backspace"):
+                    pass
+                time.sleep(0.1)
+                # while keyboard.is_pressed("enter"): 
+                #     pass
                 pass
             else:
                 error = "That was no valid input, please try again!"
