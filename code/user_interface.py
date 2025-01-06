@@ -28,6 +28,7 @@ class UI:
         """
         self.game = Game(ui=self)
         self.player = None
+        self._prefilled = False
         UI._welcome()
         self.choose_input_options_pre_game()
 
@@ -99,7 +100,11 @@ class UI:
             UI.clear()
         print("This is the current game state:")
         if modified is ...:
-            print(self.game.get_current_state())
+            if self._prefilled:
+                self.show_current_state(modified=self.game.show_prefilled_values())
+                print(Colors.to_str("Note that grey colored numbers were prefilled values",Colors.GREY))
+            else:    
+                print(self.game.get_current_state())
         else:
             print(modified)
 
@@ -120,7 +125,7 @@ class UI:
             \n[r]: Show rules of sudoku \
             \n[h]: Give me a hint \
             \n[c]: Type in new value at specified coordinates \
-            \n[u]: Show all user inputs until now\
+            \n[u]: Show/Hide all user inputs until now\
             \n[w]: Show wrong fields \
             \n[s]: Save the game and quit \
             \n-------------------------------------------------------------------------------")
@@ -128,7 +133,7 @@ class UI:
     def _show_input_options_during_coordinates_values_input():
         print("Please navigate to the desired field (by pressing arrow keys ↑,↓,→,←) and enter the number (1-9) you want to fill in. Your cursor is at the blinking cell.\
             \n[0]: Empty a cell with zero \
-            \n[u]: Show all user inputs until now \
+            \n[u]: Show/Hide all user inputs until now \
             \n[esc]: Leave this menu with escape key \
             \n-------------------------------------------------------------------------------")
     
@@ -198,21 +203,18 @@ class UI:
                 # alternative:
                 # x, y = self.get_coordinates()
                 # value = self.get_value()
-                try:
-                    while True: # All None as return value means escape
-                        x,y,value = self.get_coordinates_and_values_through_navigating()
-                        if x == None or y == None or value == None: break
-                        self._set_value(x,y,value)
-                except Exception as e:
-                    print(e)
-                    print(Colors.to_err_str("You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
-                        \nAlso, if you have linux operating system you need to execute the program as super user (sudo)\n\n"))
-                    continue
+                while True: # All None as return value means escape
+                    x,y,value = self.get_coordinates_and_values_through_navigating()
+                    if x == None or y == None or value == None: break
+                    self._set_value(x,y,value)
+                    # print(e)
+                    # print(Colors.to_err_str("You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
+                    #     \nAlso, if you have linux operating system you need to execute the program as super user (sudo)\n\n"))
+                    # continue
                 return True
             elif user_input == "u":
-                self.show_current_state(modified=self.game.show_prefilled_values())
-                print(Colors.to_str("Note that grey colored numbers were prefilled values",Colors.GREY))
-                return False
+                self._prefilled = not self._prefilled
+                return True
             elif user_input == "s":
                 # TODO give option to select filename and path
                 name, path = self.get_filename_and_path()
@@ -260,10 +262,9 @@ class UI:
         y = x
         value = None
         ch = error = ''
-        prefilled = False
         while ch != 'esc':
-            if prefilled:
-                self.show_current_state(modified=self.game.show_prefilled_values_with_blinking_cell(x,y))
+            if self._prefilled:
+                self.show_current_state(modified=self.game.show_prefilled_values_with_highlighted_cell(x,y,Colors.BLINKING))
                 print(Colors.to_str("Note that grey colored numbers were prefilled values",Colors.GREY))
             else:    
                 self.show_current_state(modified=self.game.sudoku.show_blinking_cell(x,y))
@@ -288,7 +289,7 @@ class UI:
                     return x,y,value
                 error = "Oh no! This field is already prefilled!"
             elif ch == 'u':
-                prefilled = not prefilled
+                self._prefilled = not self._prefilled
             elif ch == 'esc':
                 break
             elif ch == 'enter':

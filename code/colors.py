@@ -33,4 +33,4 @@ class Colors(Enum):
           return Colors.to_str(text,Colors.GREEN)
 
      def to_str(text:str,color) -> str:
-          return color.value + text + Colors.END.value
+          return color.value + str(text) + Colors.END.value
