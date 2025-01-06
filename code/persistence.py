@@ -29,7 +29,8 @@ class Persistence:
         Returns:
             list[Player]: List of `Player` instances.
         """
-        return [Player.from_dict({"name": name, "data": data}) for name, data in self.data["users"].items()]
+        return [Player.from_dict({"name": name, "password_hash": pw["password_hash"]}) for name, pw in self.data["users"].items()]
+
 
 
 
@@ -87,8 +88,12 @@ class Persistence:
         with open(self.filename, "w") as json_data:
             json.dump(self.data, json_data)
         
+        #TODO String rep noch abspeichern
 
-if __name__ == "main":
+if __name__ == "__main__":
     per = Persistence("data.json")
+    per.save_player(Player("serafina", "xxx"))
+    per.save_player(Player("Anja", "x"))
+    print(per.data)
     print(per.get_players())
 
