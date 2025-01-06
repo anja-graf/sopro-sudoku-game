@@ -28,8 +28,8 @@ class UI:
         """
         self.persistence = Persistence()
         self.current_game = None
-        self.name = ""
-        self.select_user()
+        self.player = self.select_user()
+        self.game = self.select_game()
 
     def select_user(self):
         """Selects an existing user or creates a new one.
@@ -42,20 +42,20 @@ class UI:
         print("Hello and Welcome to Sudoku: ")
         print("Who are you?")
         player_name = input().strip()
-        self.name = player_name
         print(f"Hello {player_name}!")
         if player_name in self.persistence.data["users"]:
-            hash = self.input_and_validate_password()
-            self.player = Player(self.name, password_hash=hash)
+            hash = self.input_and_validate_password(player_name)
+            player = Player(player_name, password_hash=hash)
             games_played = len(self.persistence.get_games_for_player(player_name))
             print(f"Welcome back! You have played: {games_played} games.")
         else:
             password = self.select_password()
-            self.player = Player(self.name, password=password)
-            self.persistence.save_player(self.player)
-            print(f"New player created: {self.player}")
+            player = Player(player_name, password=password)
+            self.persistence.save_player(player)
+            print(f"New player created: {player}")
+        return player
 
-    def input_and_validate_password(self):
+    def input_and_validate_password(self, name):
         """
         Prompts the user to input their password and validates it.
 
@@ -70,7 +70,7 @@ class UI:
             str: Returns a string representation of the password hash if the password is correct, allowing the user to proceed. 
             Keeps prompting the user if the password is incorrect.
         """
-        saved_player = self.persistence.get_players()[self.name]
+        saved_player = self.persistence.get_players()[name]
         if not saved_player.has_password():
             return None
         while True:
@@ -104,25 +104,39 @@ class UI:
             s = input().strip().lower()
             if s == "e":
                 print("Good bye! See you soon")
-                return False
+                exit()
 
             elif s == "n":
-                self.persistence = Persistence("data.json")
-
                 print("Which size do you want?")
-                self.size = self.select_size()
-
+                size = self.select_size()
                 print("Which difficulty do you want?")
-                self.difficulty = self.select_difficulty()
-
-                self.game = Game(size=self.size, difficulty=self.difficulty)
+                difficulty = self.select_difficulty()
+                game = Game(size=size, difficulty=difficulty)
+                return game
 
             elif s == "c":
-                self.persistence = Persistence("data.json")
-                if not self.persistence:
-                    print("Looks like there is no game to continue!")
-
-            print("Invalid Input, please try again!")
+                # TODO:
+                # Game braucht: Namen
+                # Game braucht: __str__ Methode, die Spielnamen, Difficulty, Size und Fortschritt (also z.B. 15/42 Zahlen eingefuegt) ausgibt
+                # Beispiel:
+                # [0]: myfirstgame, Easy, 9x9, Progress: 10/42
+                # [1]: mysecondgame, Medium, 4x4, Progress: 1/3
+                # [2]: blahblahgame, Hard, 16x16, Progress: 0/123
+                possible_games = self.persistence.get_games_for_player(self.player.name)
+                if len(possible_games) == 0:
+                    print("You do not have any open games!")
+                    continue
+                print("You have the following open games:")
+                for i, game in enumerate(possible_games):
+                    print(f"  [{i}]: {game}")
+                n = int(input().strip())
+                print()
+                print("Please give the number of the game you want to continue:")
+                while n not in range(len(possible_games)):
+                    print("Please give one of the provided game numbers!")
+                    n = int(input().strip())
+                return possible_games[n]
+            print("Invalid input, please try again!")
 
     def choose_input(self):
         """_summary_
@@ -291,36 +305,39 @@ class UI:
                     return None
                 return s
 
-    def select_size():
+    def select_size(self):
         """selects the size
 
         Returns:
-            Size: Has to be a Sqare Number
+            Size: Has to be a Square Number
         """
-
-        print("Do you want to play with a different size than 9?\n[y]: Yes\n[n]: No")
+        print("Do you want to play with a different size than 9?")
+        print("[y]: Yes")
+        print("[n]: No")
         s = input().strip().lower()
         if s == "n":
             return 9
         
         while True:
-            print("Please type in a positive Sqare number to play with this size:")
-            s = int(input().strip().lower())
-            if s > 0 and (s ** 0.5).is_integer():
+            print("Please type in a positive square number to play with this size:")
+            s = int(input().strip())
+            if s > 1 and (s ** 0.5).is_integer():
                 return s
-            print("Please type in a positive Square Number")
+            print("Please type in a positive square number")
 
 
     def select_difficulty(self):
         """selects the difficulty
 
         Returns:
-            Difficulty: the difficulty which the user has typed into the consol
+            Difficulty: The difficulty which the user has typed into the console
         """
 
-        print("Select your difficulty")
+        print("Select your difficulty:")
         while True:
-            print("[e] : Easy\n[m] : medium\n[h] : hard")
+            print("[e] : Easy")
+            print("[m] : Medium")
+            print("[h] : Hard")
             s = input().strip().lower()
             if s == "e":
                 return Difficulty.EASY

@@ -51,7 +51,6 @@ class Player:
     
     def __str__(self) -> str:
         """Returns a string representation of the Player
-
         Returns:
             str: The players name
         """
@@ -65,9 +64,9 @@ class Player:
 
     @staticmethod
     def get_password_hash(password) -> str:
-        """Transforms the provided password to a sha512 hash value.
+        """Transforms the provided password to a sha256 hash value.
         """
-        return hashlib.sha512(password.encode('utf-8')).hexdigest()
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
 if __name__ == '__main__':
