@@ -15,9 +15,10 @@ from persistence import Persistence
 
 class UI:
     """
-    Class for any inputs and outputs.
+    Class for user interface handling inputs and outputs for the Sudoku game.
 
-    User controls must be implemented in this class!
+    This class handles user interactions such as selecting a user, starting a game, 
+    inputting coordinates and values for the game, and providing instructions.
     """
 
     def __init__(self):
@@ -31,7 +32,11 @@ class UI:
         self.password = ""
 
     def select_user(self):
-        """selects the user, with or without a password
+        """Selects an existing user or creates a new one.
+
+        This method prompts the user to enter their username. If the username exists,
+        the user is logged in and their password is validated. If the username does not exist, 
+        a new user is created and the user is prompted to select a password.
         """
 
         print("Hello and Welcome to Sudoku: ")
@@ -39,20 +44,59 @@ class UI:
         s = input().strip()
         self.name = s
         print("Hello" + s)
-        if s in self.persistence.data:
-            print(
-                "Welcome back\nYou have played: "
-                + len(self.persistence.data[s])
-                + " Games"
-            )
-            # wenn passwort vorhanden, eingeben
+        if s in self.persistence.data["users"]:
+            games_played = sum(
+            1 for game in self.persistence.data["games"].values() if game["name"] == s)
+            print(f"Welcome back! You have played: {games_played} games.")
+            self.type_and_validate_password()
+
         else:
             print("Welcome " + s)
-            self.persistence.data[s]
+            self.persistence.data["users"][s] = ""
             self.password = self.select_password()
             self.player = Player(self.name, self.password)
+            print(f"New player created: {self.player}")
+
+    def type_and_validate_password(self):
+        """
+    Prompts the user to input their password and validates it.
+
+    This method ensures that the user enters the correct password to proceed. 
+    If the password is correct, the user is logged in. If the password is incorrect, 
+    the user is prompted to try again.
+
+    Args:
+        None
+
+    Returns:
+        bool: Returns `True` if the password is correct, allowing the user to proceed. 
+        Keeps prompting the user if the password is incorrect.
+    """
+        while True:
+            if self.persistence.data["users"].get(self.name, "") != "":
+                print("Please type in your Password")
+                p = input()
+                if Player.validate_credentials(self.name, p) == True:
+                    print("You are now logged in")
+                    return True
+                print("You have typed in the wrong password")
+                    
 
     def select_game(self):
+
+        """
+        Allows the user to select the type of game action they want to perform.
+
+        This method provides the user with options to start a new game, 
+        continue an existing game, or exit. Depending on the user's choice, 
+        the game will either start a new game, load an existing game, or exit the application.
+
+        Args:
+            None
+
+        Returns:
+            bool: Returns `False` if the user exits the game, and `None` otherwise.
+        """
         
         print("What do you want to do?")
         while True:
@@ -65,7 +109,6 @@ class UI:
                 return False
 
             elif s == "n":
-                # json file geöffnet bzw eine neue datei erstellt
                 self.persistence = Persistence("data.json")
 
                 print("Which size do you want?")
@@ -77,10 +120,9 @@ class UI:
                 self.game = Game(size=self.size, difficulty=self.difficulty)
 
             elif s == "c":
-                if Persistence.load_game() == None:
-                    print("Looks like theres no game to continue :(")
-                g = Persistence.load_game()
-                #?
+                self.persistence = Persistence("data.json")
+                if not self.persistence:
+                    print("Looks like there is no game to continue!")
 
             print("Invalid Input, please try again!")
 
@@ -139,6 +181,20 @@ class UI:
                 print("Not a valid input!")
 
     def input_coordinates(self):
+
+        """
+        Prompts the user to input the coordinates for a Sudoku cell.
+
+        This method ensures that the coordinates entered by the user are valid 
+        (within the grid range and the cell is not prefilled).
+
+        Args:
+            None
+
+        Returns:
+            tuple: A tuple `(x, y)` representing the coordinates chosen by the user.
+        """
+
         is_valid = False
         while not is_valid:
             try:
@@ -155,6 +211,20 @@ class UI:
                 print("Invalid input: " + ve + ". Please try again.")
 
     def input_value(self, x, y):
+        """
+    Prompts the user to input a value for the specified coordinates.
+
+    This method ensures that the value entered by the user is valid 
+    (a number between 1 and 9, or 0 to clear the cell). If valid, the value is set in the Sudoku grid.
+
+    Args:
+        x (int): The x-coordinate of the Sudoku cell.
+        y (int): The y-coordinate of the Sudoku cell.
+
+    Returns:
+        bool: `True` if the value was successfully set, otherwise continues prompting the user.
+    """    
+
         is_valid = False
         while not is_valid:
             try:
@@ -178,6 +248,10 @@ class UI:
 
     @staticmethod
     def give_instruction():
+        """Prints the instructions on how to play Sudoku.
+        This static method provides a summary of the rules and gameplay for Sudoku.
+        """
+
         print("Instructions:")
         print("How to play Sudoku:")
         print("Sudoku has a 9x9 grid, divided into 9 smaller 3x3 boxes.")
@@ -189,9 +263,25 @@ class UI:
         print("A number can appear only once in each 3x3 box.\n")
 
     def display(self):
+        """Displays the current Sudoku grid.
+            This method prints the current state of the Sudoku grid to the console.
+        """
         print(self.current_game.sudoku)
 
     def select_password(self):
+        """Prompts the user to select a password.
+
+        This method asks the user if they want to set a password, and if so,
+        prompts them to enter one. If the user does not want a password, an empty string is returned.
+
+        Args:
+            None
+
+        Returns:
+        str: The user's password, or an empty string if no password is set.
+        """
+
+
         print("Do you want to add a Password?")
         while True:
             print("[y] : Yes [n] : No")
@@ -204,8 +294,23 @@ class UI:
                 return s
 
     def select_size():
-        #TODO 
-        s = input()
+        """selects the size
+
+        Returns:
+            Size: Has to be a Sqare Number
+        """
+
+        print("Do you want to play with a different size than 9?\n[y]: Yes\n[n]: No")
+        s = input().strip().lower()
+        if s == "n":
+            return 9
+        
+        while True:
+            print("Please type in a positive Sqare number to play with this size:")
+            s = int(input().strip().lower())
+            if s > 0 and (s ** 0.5).is_integer():
+                return s
+            print("Please type in a positive Square Number")
 
 
     def select_difficulty(self):
