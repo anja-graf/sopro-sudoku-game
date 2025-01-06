@@ -97,6 +97,25 @@ class Game:
         # TODO
         pass
 
+    def str_to_game(content:list[str],name:str):
+        game = Game()
+        game.name = name
+        game.sudoku = Sudoku.str_to_sudoku(content)
+        game.time_length = Game._decode_time(content[len(content) - 2])
+        game.hint_counter = Game._decode_hints(content[len(content) - 1])
+        return game
+
+    def _decode_time(content:str) -> int:
+        return int(content[len("Needed time: "):content.find("seconds")])
+        
+    def _decode_hints(content:str) -> int:
+        return int(content[len("Needed hints: "):])
+
+    def __str__(self):
+        return "\n\n" + str(self.sudoku) + \
+                    "\nNeeded time: " + str(self.time_length) + " seconds" + \
+                    "\nNeeded hints: " + str(self.hint_counter) 
+
 if __name__ == "__main__":
     """
     write additional testing code here for things that don't work well as unit tests:

@@ -75,55 +75,17 @@ class Persistence:
             content = "Sudoku Game from " + str(dt.datetime.now())
             if game.player is not None:
                 content += ", played by " + game.player.name    
-            
-            content += "\n\n" + str(game.sudoku) + \
-                    "\nNeeded time: " + str(game.time_length) + " seconds" + \
-                    "\nNeeded hints: " + str(game.hint_counter)
+            content += str(game)
             f.write(content)
     
     def load_game(path:str) -> Game:
         #TODO Tests and Docstring, maybe validation code that checks if anything was manipulated
-        game = Game()
-        sudoku = None
         with open(path,"r") as f:
-            game.name = os.path.basename(path)
             content = list(f)
+            game = Game.str_to_game(content,os.path.basename(path))
             if "played by" in content[0]:
                 pass # TODO Player implementation
-            
-            sudoku = Sudoku(size=sum(ch == "-" for ch in content[2])) # first vertical line tells sudoku size
-            sudoku.values = Persistence._decode_sudoku_str(content,3,len(content) - 3,sudoku.grid)
-            game.sudoku = sudoku
-            game.time_length = Persistence._decode_time(content[len(content) - 2])
-            game.hint_counter = Persistence._decode_hints(content[len(content) - 1])
         return game
-
-    def _decode_sudoku_str(content:str, start:int, end:int, grid:int) -> list[list[int]]:
-        values = []
-        for i in range(start,end):
-            row = content[i] # Pick one line to decode
-            translated_row = []
-            j = 0
-            if "-" in row: continue # Skip horizontal line of '-'
-            while j < len(row):
-                if row[j] == "|": # Skip vertical line of '|'
-                    j += 2
-                    continue
-                elif row[j].isdigit(): # Number entry in cell of the sudoku field
-                    translated_row.append(int(row[j]))
-                elif row[j] == " ": # Empty cells are represented by zero
-                    translated_row.append(0)
-                if len(translated_row) % grid != 0: 
-                    j += 1 # in the middle of each grid the numbers have higher distance, 3 in total, to simplify reading
-                j += 2 # last number before the next vertical line has lower distance 2
-            values.append(translated_row)
-        return values
-
-    def _decode_time(content:str) -> int:
-        return int(content[len("Needed time: "):content.find("seconds")])
-        
-    def _decode_hints(content:str) -> int:
-        return int(content[len("Needed hints: "):])
 
     def save_to_json(self):
         """Writes all changes of the `data` attribute to the json file.

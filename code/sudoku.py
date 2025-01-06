@@ -142,7 +142,8 @@ class Sudoku(object):
             b = []
             for c in cols:
                 b.append(
-                    nums[(self.grid * (r % self.grid) + r // self.grid + c) % self.size]
+                    nums[(self.grid * (r % self.grid) +
+                          r // self.grid + c) % self.size]
                 )
             self.values.append(b)
         self.solution = Sudoku._deep_copy(self.values)
@@ -459,7 +460,8 @@ class Sudoku(object):
         >>> Sudoku._is_valid_sudoku_list([7, 6, 0, 1, 2, 5, 8, 9, 4])
         True
         """
-        l_without_zero = [item for item in l if item != 0]  # Remove empty 0 cells
+        l_without_zero = [item for item in l if item !=
+                          0]  # Remove empty 0 cells
         # Check duplicates
         return len(l_without_zero) == len(set(l_without_zero))
 
@@ -561,7 +563,8 @@ class Sudoku(object):
         >>> "\x1b[94m6\x1b[0m" in s.show_value(1,1,Colors.BLUE) # Note that the expression in quotation marks is a blue 6 (also noticeable in the tests output)
         True
         """
-        highlighted_list = [[0 for i in range(self.size)] for j in range(self.size)]
+        highlighted_list = [
+            [0 for i in range(self.size)] for j in range(self.size)]
         highlighted_list[x][y] = self.values[x][y]
         if self.values[x][y] == 0:
             highlighted_list[x][y] = "_"
@@ -572,7 +575,7 @@ class Sudoku(object):
     def show_blinking_cell(self, x: int, y: int) -> LiteralString | str:
         """Returns a string representation with a blinking cell at the given coordinates. 
         That will be either an actual value or an underscore, depending on if the value is empty in the sudoku field.
-        
+
         Notice that you might have to execute the program in a separate console because 
         e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
 
@@ -597,7 +600,7 @@ class Sudoku(object):
         >>> "\x1b[91m5\x1b[0m" in s.show_wrong_fields() # Note that the expression in quotation marks is a red 5 (also noticeable in the tests output)
         True
         """
-        # If generate_new_solution was set to True an exception could be thrown, 
+        # If generate_new_solution was set to True an exception could be thrown,
         # because the user can set wrong values which lead to an unsolvable sudoku field
         wrong_fields = self._get_wrong_fields(generate_new_solution=False)
         return self.__str__(wrong_fields, Colors.RED)
@@ -627,6 +630,53 @@ class Sudoku(object):
             wrong_fields.append(value_row)
         return wrong_fields
 
+    def _str_to_value(content: list[str], start: int, end: int, grid: int) -> list[list[int]]:
+        """ This method extracts the list of rows from the string representation, 
+        which can be used for the values attribute.
+
+        >>> content = ['| 1  7    | 3       | 9  4    |\\n','|    6    | 9  4  5 | 2  1  7 |\\n','|    5    |    1  7 |    8  6 |\\n',' -  -  -  -  -  -  -  -  - \\n','|    8  5 | 7  2  4 | 6     1 |\\n','| 3     6 | 5  9  8 |    2  4 |\\n','| 2  4  7 | 6  3  1 | 5  9  8 |\\n',' -  -  -  -  -  -  -  -  - \\n','|       8 | 4     9 |         |\\n','| 7  9  4 | 1  6  2 | 8  5  3 |\\n','| 6  2  1 | 8  5  3 | 4  7  9 |\\n']
+        >>> Sudoku._str_to_value(content,0,len(content),3)
+        [[1, 7, 0, 3, 0, 0, 9, 4, 0], [0, 6, 0, 9, 4, 5, 2, 1, 7], [0, 5, 0, 0, 1, 7, 0, 8, 6], [0, 8, 5, 7, 2, 4, 6, 0, 1], [3, 0, 6, 5, 9, 8, 0, 2, 4], [2, 4, 7, 6, 3, 1, 5, 9, 8], [0, 0, 8, 4, 0, 9, 0, 0, 0], [7, 9, 4, 1, 6, 2, 8, 5, 3], [6, 2, 1, 8, 5, 3, 4, 7, 9]]
+        """
+        values = []
+        for i in range(start, end):
+            row = content[i]  # Pick one line to decode
+            translated_row = []
+            j = 0
+            if "-" in row:
+                continue  # Skip horizontal line of '-'
+            while j < len(row):
+                if row[j] == "|":  # Skip vertical line of '|'
+                    j += 2
+                    continue
+                elif row[j].isdigit():  # Number entry in cell of the sudoku field
+                    translated_row.append(int(row[j]))
+                elif row[j] == " ":  # Empty cells are represented by zero
+                    translated_row.append(0)
+                if len(translated_row) % grid != 0:
+                    j += 1  # in the middle of each grid the numbers have higher distance, 3 in total, to simplify reading
+                j += 2  # last number before the next vertical line has lower distance 2
+            values.append(translated_row)
+        return values
+
+    def str_to_sudoku(content: list[str]):
+        """ This method takes the file content of a saved Sudoku and with that 
+        undoes the __str__() method. It returns a new sudoku object.
+        Afterwards this sudoku object has its attributes values, size and grid set.
+        
+        >>> content = ['Sudoku Game from 2025-01-06 13:09:09.371111\\n','\\n',' -  -  -  -  -  -  -  -  - \\n','| 1  7    | 3       | 9  4    |\\n','|    6    | 9  4  5 | 2  1  7 |\\n','|    5    |    1  7 |    8  6 |\\n',' -  -  -  -  -  -  -  -  - \\n','|    8  5 | 7  2  4 | 6     1 |\\n','| 3     6 | 5  9  8 |    2  4 |\\n','| 2  4  7 | 6  3  1 | 5  9  8 |\\n',' -  -  -  -  -  -  -  -  - \\n','|       8 | 4     9 |         |\\n','| 7  9  4 | 1  6  2 | 8  5  3 |\\n','| 6  2  1 | 8  5  3 | 4  7  9 |\\n','\\n','Needed time: 24 seconds\\n','Needed hints: 0']
+        >>> s = Sudoku.str_to_sudoku(content)
+        >>> s.values
+        [[1, 7, 0, 3, 0, 0, 9, 4, 0], [0, 6, 0, 9, 4, 5, 2, 1, 7], [0, 5, 0, 0, 1, 7, 0, 8, 6], [0, 8, 5, 7, 2, 4, 6, 0, 1], [3, 0, 6, 5, 9, 8, 0, 2, 4], [2, 4, 7, 6, 3, 1, 5, 9, 8], [0, 0, 8, 4, 0, 9, 0, 0, 0], [7, 9, 4, 1, 6, 2, 8, 5, 3], [6, 2, 1, 8, 5, 3, 4, 7, 9]]
+        >>> s.size == 9
+        True
+        >>> s.grid == 3
+        True
+        """
+        sudoku = Sudoku(size=sum(ch == "-" for ch in content[2])) # first vertical line tells sudoku size
+        sudoku.values = Sudoku._str_to_value(content,3,len(content) - 3,sudoku.grid)
+        return sudoku
+
     def __str__(
         self,
         highlighted_values: list[list[int | str]] = ...,
@@ -635,7 +685,7 @@ class Sudoku(object):
         """String representation of a sudoku field as a formatted matrix. All empty cells with 0 will be replaces with spaces.
         If both highlighted_values and highlighted_color are given, every entry in highlighted_values that is not empty will be printed
         in the given color instead of the originally value entry of the sudoku field.
-        
+
         Notice that you might have to execute the program in a separate console because 
         e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
 
