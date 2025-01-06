@@ -154,6 +154,7 @@ class UI:
                     self.game = Persistence.load_game(path)
                     self.game.ui = self
                 except Exception as e:
+                    #TODO not here but in separated colors class
                     print(Colors.RED.value + "This file could not be loaded:" + str(e) + Colors.END.value + "\n\n")
                     continue
                 self.game.run()
@@ -179,10 +180,9 @@ class UI:
                 UI.show_rules()
                 return True
             elif user_input == "h":
-                self.game.hint_counter += 1
-                UI.clear()
                 try:
-                    print(self.game.sudoku.show_and_set_hint())
+                    self.show_current_state(modified=self.game.sudoku.show_and_set_hint())
+                    self.game.hint_counter += 1
                 except Exception:
                     print("This option should only be used if the sudoku field is solvable. Try out w!")
                     self.show_current_state(False)
@@ -191,9 +191,15 @@ class UI:
             elif user_input == "c":
                 #TODO coordinates input
                 # alternative:
-                #x, y = self.get_coordinates()
-                #value = self.get_value()
-                x,y,value = self.get_coordinates_and_values_through_navigating()
+                # x, y = self.get_coordinates()
+                # value = self.get_value()
+                try:
+                    x,y,value = self.get_coordinates_and_values_through_navigating()
+                except:
+                    #TODO not here but in separated colors class
+                    print(Colors.RED.value + "You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
+                          \nAlso, if you have linux operating system you need to execute the program as super user (sudo)" + Colors.END.value + "\n\n")
+                    continue
                 if x is None or y is None or value is None:
                     return True
                 self._set_value(x,y,value)
@@ -208,7 +214,13 @@ class UI:
                     \nGoodbye, thanks for playing sudoku!")
                 exit()
             elif user_input == "w":
-                pass #TODO show wrong fields & print important notes for using
+                wrong_fields = self.game.sudoku.show_wrong_fields()
+                self.show_current_state(modified=wrong_fields)
+                if wrong_fields == self.game.sudoku.__str__():
+                    print(Colors.GREEN.value + "You have no mistakes so far!" + Colors.END.value)
+                #TODO remove wrong fields functionality maybe
+                #TODO print important notes for using
+                return False
             else:
                 print("'" + str(user_input) + "' is not a valid input!")
 
@@ -313,9 +325,13 @@ class UI:
         
     def _set_value(self,x,y,value):
         self.game.sudoku.set(x, y, value)
-        print("The value was set successfully!")
         UI.clear()
-        print(self.game.sudoku.show_and_set_value(x, y, value, Colors.YELLOW))
+        if self.game.sudoku.is_valid():
+            print(self.game.sudoku.show_and_set_value(x, y, value, Colors.GREEN))
+        else:
+            print(self.game.sudoku.show_and_set_value(x, y, value, Colors.YELLOW))
+            print(Colors.YELLOW.value + "This value violates sudoku rules!" + Colors.END.value)
+        print("The value was set successfully!")
 
     def show_rules():
         print("Sudoku is a number puzzle played normally on a 9x9 grid, which is divided into 9 smaller 3x3 subgrids. The objective is to fill the grid with numbers from 1 to 9, following three main rules: \
