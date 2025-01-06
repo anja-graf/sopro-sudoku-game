@@ -107,10 +107,10 @@ class UI:
         #TODO implement input given game
         print("The following are all the input options before the game:\
             \n[n]: Start a new sudoku game \
-            \n[d]: Set the difficulty (easy, medium, hard). The default is easy.\
-            \n[s]: Set size of sudoku. The default is 9.\
-            \n[p]: Set player. \
-            \n[o]: Open game from file. \
+            \n[d]: Set the difficulty (easy, medium, hard). The default is easy \
+            \n[s]: Set size of sudoku. The default is 9 \
+            \n[p]: Set player \
+            \n[o]: Open game from file \
             \n[h]: Show all high scores \
             \n[r]: Show rules of sudoku \
             \n-------------------------------------------------------------------------------")
@@ -120,14 +120,16 @@ class UI:
             \n[r]: Show rules of sudoku \
             \n[h]: Give me a hint \
             \n[c]: Type in new value at specified coordinates \
+            \n[u]: Show all user inputs until now\
             \n[w]: Show wrong fields \
             \n[s]: Save the game and quit \
             \n-------------------------------------------------------------------------------")
     
     def _show_input_options_during_coordinates_values_input():
         print("Please navigate to the desired field (by pressing arrow keys ↑,↓,→,←) and enter the number (1-9) you want to fill in. Your cursor is at the blinking cell.\
-            \nTo empty a cell enter 0.\
-            \nTo leave this menu enter escape key.\
+            \n[0]: Empty a cell with zero \
+            \n[u]: Show all user inputs until now \
+            \n[esc]: Leave this menu with escape key \
             \n-------------------------------------------------------------------------------")
     
     def _show_input_options_save_game(name:str,path:str):
@@ -141,8 +143,10 @@ class UI:
         pass
 
     def choose_input_options_pre_game(self):
+        user_input = ""
         while True:
-            UI._show_input_options_pre_game()
+            if user_input == "":
+                UI._show_input_options_pre_game()
             user_input = input().strip().lower()
 
             if user_input == "r":
@@ -155,8 +159,7 @@ class UI:
                     self.game = Persistence.load_game(path)
                     self.game.ui = self
                 except Exception as e:
-                    #TODO not here but in separated colors class
-                    print(Colors.RED.value + "This file could not be loaded:" + str(e) + Colors.END.value + "\n\n")
+                    print(Colors.to_err_str("This file could not be loaded:" + str(e) + "\n\n"))
                     continue
                 self.game.run()
             elif user_input == "p":
@@ -170,11 +173,13 @@ class UI:
             elif user_input == "n":
                 self.game.run()
             else:
-                print("Not a valid input!")
+                print(Colors.to_err_str("That was no valid input, please try again!"))
     
     def choose_input_options_during_game(self) -> bool:
+        user_input = ""
         while True:
-            UI._show_input_options_during_game()
+            if user_input == "": # There has been no error
+                UI._show_input_options_during_game()
             user_input = input().strip().lower()
             if user_input == "r":
                 UI.show_rules()
@@ -185,8 +190,7 @@ class UI:
                     self.game.hint_counter += 1
                 except Exception:
                     self.show_current_state()
-                    #Colors
-                    print("This option should only be used if the sudoku field is solvable. Try out w!")
+                    print(Colors.to_err_str("This option should only be used if the sudoku field is solvable. Try out w!"))
                 return False
                 pass #TODO give hint
             elif user_input == "c":
@@ -201,11 +205,14 @@ class UI:
                         self._set_value(x,y,value)
                 except Exception as e:
                     print(e)
-                    #TODO not here but in separated colors class
-                    print(Colors.RED.value + "You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
-                          \nAlso, if you have linux operating system you need to execute the program as super user (sudo)" + Colors.END.value + "\n\n")
+                    print(Colors.to_err_str("You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
+                        \nAlso, if you have linux operating system you need to execute the program as super user (sudo)\n\n"))
                     continue
                 return True
+            elif user_input == "u":
+                self.show_current_state(modified=self.game.show_prefilled_values())
+                print(Colors.to_str("Note that grey colored numbers were prefilled values",Colors.GREY))
+                return False
             elif user_input == "s":
                 # TODO give option to select filename and path
                 name, path = self.get_filename_and_path()
@@ -219,12 +226,12 @@ class UI:
                 wrong_fields = self.game.sudoku.show_wrong_fields()
                 self.show_current_state(modified=wrong_fields)
                 if wrong_fields == self.game.sudoku.__str__():
-                    print(Colors.GREEN.value + "You have no mistakes so far!" + Colors.END.value)
+                    print(Colors.to_right_str("You have no mistakes so far!"))
                 #TODO remove wrong fields functionality maybe
                 #TODO print important notes for using
                 return False
             else:
-                print(str(user_input) + " is not a valid input!")
+                print(Colors.to_err_str("That was no valid input, please try again!"))
 
     def get_coordinates(self) -> tuple[int,int]:
         is_valid = False
@@ -253,11 +260,16 @@ class UI:
         y = x
         value = None
         ch = error = ''
+        prefilled = False
         while ch != 'esc':
-            self.show_current_state(modified=self.game.sudoku.show_blinking_cell(x,y))
+            if prefilled:
+                self.show_current_state(modified=self.game.show_prefilled_values_with_blinking_cell(x,y))
+                print(Colors.to_str("Note that grey colored numbers were prefilled values",Colors.GREY))
+            else:    
+                self.show_current_state(modified=self.game.sudoku.show_blinking_cell(x,y))
             UI._show_input_options_during_coordinates_values_input()
             if error != '':
-                print(Colors.RED.value + error + Colors.END.value)
+                print(Colors.to_err_str(error))
             error = ''
             ch = keyboard.read_key()
             time.sleep(0.2)
@@ -275,6 +287,8 @@ class UI:
                     UI.flush()
                     return x,y,value
                 error = "Oh no! This field is already prefilled!"
+            elif ch == 'u':
+                prefilled = not prefilled
             elif ch == 'esc':
                 break
             elif ch == 'enter':
@@ -332,14 +346,13 @@ class UI:
         UI.clear()
         if self.game.sudoku.is_valid():
             print(self.game.sudoku.show_and_set_value(x, y, value, Colors.GREEN))
-            print(Colors.GREEN.value + "This value is compliant to sudoku rules! \
-                \nType in enter to proceed! Press enter to proceed\
-                \n[r]: Revoke new value" + Colors.END.value)
+            print(Colors.to_right_str("This value is compliant to sudoku rules! Press enter to proceed \
+                \n[r]: Revoke new value"))
         else:
             print(self.game.sudoku.show_and_set_value(x, y, value, Colors.YELLOW))
-            print(Colors.YELLOW.value + "This value violates sudoku rules! \
-                \nDo you really want to set it? Press enter to proceed\
-                \n[r]: Revoke new value" + Colors.END.value)
+            print(Colors.to_may_str("This value violates sudoku rules! \
+                \nDo you really want to set it? Press enter to proceed \
+                \n[r]: Revoke new value"))
         if input() == "r": 
             self.game.sudoku.set(x,y,pre_value)
             print("The value was not set!")        
@@ -353,7 +366,7 @@ class UI:
             \n- Column Rule: Each column must also contain all the numbers from 1 to 9 without repetition. \
             \n- Subgrid Rule: Each of the nine 3x3 subgrids must contain all the numbers from 1 to 9 without repetition. \
             \nThe puzzle starts with some numbers already filled in, and the goal is to complete the grid while adhering to these rules.")
-        input("Type in enter to proceed!\n")
+        input("Press enter to proceed!\n")
 
     def display(self):
         print(self.game.sudoku)
@@ -405,7 +418,7 @@ class UI:
     def flush():
         import keyboard
         keyboard.press_and_release('enter')
-        input("Type in enter to proceed!\n")
+        input("Press enter to proceed!\n")
         # import sys
         # sys.stdout.flush()
 if __name__ == "__main__":

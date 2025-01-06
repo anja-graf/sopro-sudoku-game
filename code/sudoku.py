@@ -12,6 +12,7 @@ class Difficulty(Enum):
     MEDIUM = 2
     HARD = 3
 
+
 class Sudoku(object):
     """Represents the players' sudoku field
 
@@ -639,7 +640,7 @@ class Sudoku(object):
         """ This method takes the file content of a saved Sudoku and with that 
         undoes the __str__() method. It returns a new sudoku object.
         Afterwards this sudoku object has its attributes values, size and grid set.
-        
+
         >>> content = ['Sudoku Game from 2025-01-06 13:09:09.371111\\n','\\n',' -  -  -  -  -  -  -  -  - \\n','| 1  7    | 3       | 9  4    |\\n','|    6    | 9  4  5 | 2  1  7 |\\n','|    5    |    1  7 |    8  6 |\\n',' -  -  -  -  -  -  -  -  - \\n','|    8  5 | 7  2  4 | 6     1 |\\n','| 3     6 | 5  9  8 |    2  4 |\\n','| 2  4  7 | 6  3  1 | 5  9  8 |\\n',' -  -  -  -  -  -  -  -  - \\n','|       8 | 4     9 |         |\\n','| 7  9  4 | 1  6  2 | 8  5  3 |\\n','| 6  2  1 | 8  5  3 | 4  7  9 |\\n','\\n','Needed time: 24 seconds\\n','Needed hints: 0']
         >>> s = Sudoku.str_to_sudoku(content)
         >>> s.values
@@ -649,8 +650,11 @@ class Sudoku(object):
         >>> s.grid == 3
         True
         """
-        sudoku = Sudoku(size=sum(ch == "-" for ch in content[2])) # first vertical line tells sudoku size
-        sudoku.values = Sudoku._str_to_values(content,3,len(content) - 3,sudoku.grid)
+        sudoku = Sudoku(size=sum(
+            # first vertical line tells sudoku size
+            ch == "-" for ch in content[2]))
+        sudoku.values = Sudoku._str_to_values(
+            content, 3, len(content) - 3, sudoku.grid)
         return sudoku
 
     def __str__(
@@ -709,9 +713,7 @@ class Sudoku(object):
                     # Colored output of those values of highlighted_values that are not empty
                     rep += (
                         " "
-                        + highlighted_color.value
-                        + str(highlighted_values[i][j])
-                        + Colors.END.value
+                        + Colors.to_str(str(highlighted_values[i][j]), highlighted_color)
                         + " "
                     )
             rep += "|\n"

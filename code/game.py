@@ -93,9 +93,15 @@ class Game:
         self.ui._bye()
         self.finish_game()
         
-    def show_prefilled_values(self):
-        # TODO
-        pass
+    def show_prefilled_values(self) -> str:
+        return self.sudoku.__str__(self.copy_sudoku, Colors.GREY)
+    
+    def show_prefilled_values_with_blinking_cell(self,x,y) -> str:
+        value = self.sudoku.values[x][y]
+        self.sudoku.values[x][y] = Colors.to_str(self.sudoku.values[x][y], Colors.BLINKING)
+        prefilled_with_blinking_mix = self.show_prefilled_values()
+        self.sudoku.values[x][y] = value
+        return prefilled_with_blinking_mix
 
     def str_to_game(content:list[str],name:str):
         game = Game()
