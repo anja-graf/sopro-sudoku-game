@@ -102,14 +102,3 @@ class Persistence:
 
     def get_current_dir() -> str:
         return os.getcwd()
-    
-# g = Game()
-# #g.player = Player(name="testPlayername")
-# g.time_length = 2
-# Persistence.save_game(g,"/home/anja/Dokumente/")
-
-#Persistence.load_game("/home/anja/Dokumente/Sudoku Game 2025-01-05 18:30:55.260268")
-
-#print(Persistence.check_filepath("/home/anja/Dokumente/Sudoku Game 2025-01-05 18:30:55.260268"))
-#print(Persistence.get_current_dir())
-print(Persistence.check_path(""))

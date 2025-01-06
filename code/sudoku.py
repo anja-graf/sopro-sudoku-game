@@ -630,12 +630,12 @@ class Sudoku(object):
             wrong_fields.append(value_row)
         return wrong_fields
 
-    def _str_to_value(content: list[str], start: int, end: int, grid: int) -> list[list[int]]:
+    def _str_to_values(content: list[str], start: int, end: int, grid: int) -> list[list[int]]:
         """ This method extracts the list of rows from the string representation, 
         which can be used for the values attribute.
 
         >>> content = ['| 1  7    | 3       | 9  4    |\\n','|    6    | 9  4  5 | 2  1  7 |\\n','|    5    |    1  7 |    8  6 |\\n',' -  -  -  -  -  -  -  -  - \\n','|    8  5 | 7  2  4 | 6     1 |\\n','| 3     6 | 5  9  8 |    2  4 |\\n','| 2  4  7 | 6  3  1 | 5  9  8 |\\n',' -  -  -  -  -  -  -  -  - \\n','|       8 | 4     9 |         |\\n','| 7  9  4 | 1  6  2 | 8  5  3 |\\n','| 6  2  1 | 8  5  3 | 4  7  9 |\\n']
-        >>> Sudoku._str_to_value(content,0,len(content),3)
+        >>> Sudoku._str_to_values(content,0,len(content),3)
         [[1, 7, 0, 3, 0, 0, 9, 4, 0], [0, 6, 0, 9, 4, 5, 2, 1, 7], [0, 5, 0, 0, 1, 7, 0, 8, 6], [0, 8, 5, 7, 2, 4, 6, 0, 1], [3, 0, 6, 5, 9, 8, 0, 2, 4], [2, 4, 7, 6, 3, 1, 5, 9, 8], [0, 0, 8, 4, 0, 9, 0, 0, 0], [7, 9, 4, 1, 6, 2, 8, 5, 3], [6, 2, 1, 8, 5, 3, 4, 7, 9]]
         """
         values = []
@@ -674,7 +674,7 @@ class Sudoku(object):
         True
         """
         sudoku = Sudoku(size=sum(ch == "-" for ch in content[2])) # first vertical line tells sudoku size
-        sudoku.values = Sudoku._str_to_value(content,3,len(content) - 3,sudoku.grid)
+        sudoku.values = Sudoku._str_to_values(content,3,len(content) - 3,sudoku.grid)
         return sudoku
 
     def __str__(
