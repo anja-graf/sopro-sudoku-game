@@ -109,6 +109,22 @@ class Game:
         return prefilled_with_blinking_mix
 
     def str_to_game(content:list[str],name:str):
+        """ This method takes the file content of a saved Game and with that 
+        undoes the __str__() method. It returns a new game object.
+        Afterwards this game object has its attributes name, sudoku (with values, size and grid), 
+        time_length and hint_counter set.
+        
+        Note that the game.sudoku attribute is tested in str_to_sudoku() method
+        >>> content = ['Sudoku Game from 2025-01-06 13:09:09.371111\\n', '\\n', ' -  -  -  -  -  -  -  -  - \\n', '| 1  7    | 3       | 9  4    |\\n', '|    6    | 9  4  5 | 2  1  7 |\\n', '|    5    |    1  7 |    8  6 |\\n', ' -  -  -  -  -  -  -  -  - \\n', '|    8  5 | 7  2  4 | 6     1 |\\n', '| 3     6 | 5  9  8 |    2  4 |\\n', '| 2  4  7 | 6  3  1 | 5  9  8 |\\n', ' -  -  -  -  -  -  -  -  - \\n', '|       8 | 4     9 |         |\\n', '| 7  9  4 | 1  6  2 | 8  5  3 |\\n', '| 6  2  1 | 8  5  3 | 4  7  9 |\\n', '\\n', 'Needed time: 24 seconds\\n', 'Needed hints: 0']
+        >>> name = 'Sudoku Game'
+        >>> game = Game.str_to_game(content,name)
+        >>> game.name
+        'Sudoku Game'
+        >>> game.time_length
+        24
+        >>> game.hint_counter
+        0
+        """
         game = Game()
         game.name = name
         game.sudoku = Sudoku.str_to_sudoku(content)
@@ -117,34 +133,86 @@ class Game:
         return game
 
     def _decode_time(content:str) -> int:
+        """
+        Helper method to decode needed time so far. It is used in str_to_game() method 
+        but only takes the string where the hint count is located in instead of the
+        whole file content.
+        
+        >>> content = 'Needed time: 123 seconds\\n'
+        >>> Game._decode_time(content)
+        123
+        """
+        
         return int(content[len("Needed time: "):content.find("seconds")])
         
     def _decode_hints(content:str) -> int:
+        """ 
+        Helper method to decode needed hints. It is used in str_to_game() method 
+        but only takes the string where the hint count is located in instead of the
+        whole file content.
+        
+        >>> content = 'Needed hints: 123'
+        >>> Game._decode_hints(content)
+        123
+        """
         return int(content[len("Needed hints: "):])
     
     def info(self) -> str:
         """
-        # >>> game = Game()  # create new game
-        # >>> game.info()
-        # Sudoku Game 2025-01-07 10:35:15.198427, 3 x 3, Progress: 0/20
+        String Representation of the most identifying features to separate current game object from others.
+        This is mostly useful for loading a saved game, because the name alone can be changed from User and 
+        can be not identifying.
+        
+        >>> game = Game()
+        >>> "3 x 3, Progress: 0/20" in game.info() # e.g. Sudoku Game 2025-01-07 11:11:03.646943, Difficulty.EASY, 3 x 3, Progress: 0/20
+        True
+        
+        >>> new_game = Game(size = 16, difficulty = Difficulty.MEDIUM)
+        >>> "Difficulty.MEDIUM, 4 x 4, Progress: 0/128" in new_game.info() # e.g. Sudoku Game 2025-01-07 11:11:03.646943, Difficulty.EASY, 3 x 3, Progress: 0/20
+        True
         """
-        beginEmptyCellCount = Sudoku(values=self.copy_sudoku)._count_empty_cells()
+        beginEmptyCellCount = Sudoku(size=self.sudoku.size,values=self.copy_sudoku)._count_empty_cells()
         currentEmptyCellCount = self.sudoku._count_empty_cells()
         return str(self.name) + ", " + str(self.sudoku.get_difficulty(beginEmptyCellCount)) + ", " +\
                 str(self.sudoku.grid) + " x " + str(self.sudoku.grid) + \
-                ", Progress: " + str(beginEmptyCellCount - currentEmptyCellCount) + "/" + str(beginEmptyCellCount)
+                ", Progress: " + str(currentEmptyCellCount - beginEmptyCellCount) + "/" + str(beginEmptyCellCount)
 
-    def __str__(self):
+    def __str__(self) -> LiteralString | str:
+        """
+        String representation of a game object and its attributes sudoku, time_length and hint_counter.
+        Note that the name will not be included since it is only necessary for saving the game and
+        should be equivalent to the files path basename
+        
+        >>> game = Game()
+        >>> game.sudoku.values = [[0, 8, 2, 7, 4, 6, 0, 3, 5], [1, 3, 5, 2, 0, 9, 0, 4, 7], [6, 4, 7, 5, 3, 1, 0, 8, 2], [3, 0, 6, 1, 5, 8, 0, 0, 9], [0, 2, 9, 6, 0, 3, 8, 5, 1], [8, 0, 1, 9, 0, 4, 3, 7, 0], [0, 0, 0, 3, 0, 5, 2, 1, 8], [0, 6, 3, 8, 1, 2, 0, 9, 4], [2, 1, 8, 4, 9, 7, 5, 0, 3]]
+        >>> print(game)
+        <BLANKLINE>
+        <BLANKLINE>
+         -  -  -  -  -  -  -  -  - 
+        |    8  2 | 7  4  6 |    3  5 |
+        | 1  3  5 | 2     9 |    4  7 |
+        | 6  4  7 | 5  3  1 |    8  2 |
+         -  -  -  -  -  -  -  -  - 
+        | 3     6 | 1  5  8 |       9 |
+        |    2  9 | 6     3 | 8  5  1 |
+        | 8     1 | 9     4 | 3  7    |
+         -  -  -  -  -  -  -  -  - 
+        |         | 3     5 | 2  1  8 |
+        |    6  3 | 8  1  2 |    9  4 |
+        | 2  1  8 | 4  9  7 | 5     3 |
+        <BLANKLINE>
+        Needed time: 0 seconds
+        Needed hints: 0
+        """
         return "\n\n" + str(self.sudoku) + \
                     "\nNeeded time: " + str(self.time_length) + " seconds" + \
                     "\nNeeded hints: " + str(self.hint_counter) 
 
 if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)
     """
     write additional testing code here for things that don't work well as unit tests:
     """
     # Anjas TODO Write Docs and Test
-    # Example for how we might test your program:
-    game = Game(difficulty=Difficulty.EASY)  # create new game
-    print(game.info())
-    #game.run()
