@@ -165,6 +165,29 @@ class Sudoku(object):
         for p in sample(range(squares), empties):
             self.values[p // self.size][p % self.size] = 0
 
+    def get_difficulty(self, beginEmptyCellCount:int) -> Difficulty:
+        """ The difficulty a sudoku has won't be saved as parameter. 
+        With this method you can still determine it.
+        The value beginEmptyCellCount should represent how many cells were empty in the beginning. 
+        
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> s.get_difficulty(s._count_empty_cells()) # In the beginning there are no user inputs
+        <Difficulty.EASY: 1>
+        >>> s.create(difficulty=Difficulty.MEDIUM)
+        >>> s.get_difficulty(s._count_empty_cells()) 
+        <Difficulty.MEDIUM: 2>
+        >>> s.create(difficulty=Difficulty.HARD)
+        >>> s.get_difficulty(s._count_empty_cells()) 
+        <Difficulty.HARD: 3>
+        
+        """
+        if beginEmptyCellCount == self.size **2 * 2 // 4:
+            return Difficulty.MEDIUM
+        elif beginEmptyCellCount == self.size **2 * 3 // 4:
+            return Difficulty.HARD
+        return Difficulty.EASY
+
     def set(self, x: int, y: int, new_value: int):
         """Sets specified new_value in a the sudoku field with coordinates x and y and allows 'empty' value 0
 

@@ -121,6 +121,18 @@ class Game:
         
     def _decode_hints(content:str) -> int:
         return int(content[len("Needed hints: "):])
+    
+    def info(self) -> str:
+        """
+        # >>> game = Game()  # create new game
+        # >>> game.info()
+        # Sudoku Game 2025-01-07 10:35:15.198427, 3 x 3, Progress: 0/20
+        """
+        beginEmptyCellCount = Sudoku(values=self.copy_sudoku)._count_empty_cells()
+        currentEmptyCellCount = self.sudoku._count_empty_cells()
+        return str(self.name) + ", " + str(self.sudoku.get_difficulty(beginEmptyCellCount)) + ", " +\
+                str(self.sudoku.grid) + " x " + str(self.sudoku.grid) + \
+                ", Progress: " + str(beginEmptyCellCount - currentEmptyCellCount) + "/" + str(beginEmptyCellCount)
 
     def __str__(self):
         return "\n\n" + str(self.sudoku) + \
@@ -133,5 +145,6 @@ if __name__ == "__main__":
     """
     # Anjas TODO Write Docs and Test
     # Example for how we might test your program:
-    game = Game()  # create new game
-    game.run()
+    game = Game(difficulty=Difficulty.EASY)  # create new game
+    print(game.info())
+    #game.run()
