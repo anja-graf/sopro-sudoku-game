@@ -24,6 +24,24 @@ class Game:
         The number of players in Sudoku is always one, therefore the only parameters here will be 
         the difficulty (easy, medium and difficult) and the size of the Sudoku field (per default 9 with 3x3 grids). 
         To be able to set a high score we also want to implement a timer that measures the needed time.
+        As already described in Sudoku constructor the given size has to be a square number. The smallest possible size is 4.
+        
+        >>> game = Game()
+        >>> game.sudoku.size == 9
+        True
+        >>> game.sudoku.values == game.copy_sudoku
+        True
+        >>> game.hint_counter
+        0
+        >>> game.time_length 
+        0
+        >>> game.sudoku.get_difficulty(game.sudoku._count_empty_cells()) 
+        <Difficulty.EASY: 1>
+        
+        >>> new_game = Game(size=-1) # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        ValueError: This size can not be taken as a valid sudoku size, because it is to small!
         """
         self.sudoku = Sudoku(size)
         self.sudoku.create(difficulty)
@@ -37,12 +55,28 @@ class Game:
         
         self.name = "Sudoku Game " + str(dt.datetime.now())
 
-    def start_timer(self):
-        """This is a helper method to start a timer a soon as a Game is created."""
+    def _start_timer(self):
+        """
+        This is a helper method to start a timer a soon as a Game is created and run() method called.
+        It will set the games attribute 'time_start' to the time the method was called.
+        
+        >>> game = Game()
+        >>> game._start_timer()
+        >>> game.time_start != None
+        True
+        """
         self.time_start = time.time()
 
     def measure_time_needed(self) -> int:
-        """This is a helper method to measure the needed time for the sudoku in seconds."""
+        """This is a helper method to measure the needed time for the sudoku in seconds.
+        >>> game = Game()
+        >>> game._start_timer()
+        >>> game.measure_time_needed()
+        0
+        >>> time.sleep(2)
+        >>> game.measure_time_needed()
+        2
+        """
         return int(time.time() - self.time_start) # int cast to get seconds
         
     def set_player(self,player:Player):
@@ -53,26 +87,60 @@ class Game:
 
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''
-        # Anjas TODO Maybe invoke high score saving process or other useful functionality
+        # Anjas TODO Maybe complete if something is missing here
+        self.ui._bye()
         del self.sudoku
         del self.time_start
         del self.copy_sudoku
 
     def is_finished(self) -> bool: 
         '''Checks if the game is successfully finished by calling the method is_solved() in Sudoku class.
-        This is the renamed win_condition() method.'''
+        This is the renamed win_condition() method.
+
+        >>> game = Game()
+        >>> game.sudoku = Sudoku(size=9,values=[[7, 2, 8, 3, 4, 6, 5, 1, 9], [5, 9, 1, 2, 8, 7, 6, 4, 3], [6, 3, 4, 9, 1, 5, 7, 8, 2], [1, 6, 3, 5, 9, 8, 4, 2, 7], [4, 7, 2, 6, 3, 1, 8, 9, 5], [8, 5, 9, 7, 2, 4, 1, 3, 6], [2, 8, 5, 4, 7, 3, 9, 6, 1], [9, 1, 6, 8, 5, 2, 3, 7, 4], [3, 4, 7, 1, 6, 9, 2, 5, 8]])
+        >>> game.sudoku.is_solved()
+        True
+
+        >>> game.sudoku.values[0][0] = 0
+        >>> game.sudoku.is_solved()
+        False
+        '''
         return self.sudoku.is_solved()
 
-    def lose_condition():
-        '''In Sudoku a player can not really lose. That is why it is not appointed yet if we want to implement this method. 
-        The only thing it could possibly check is if a Sudoku is not solvable, 
-        but that should not happen since the program should be able to automatically generate new, and always solvable Sudoku fields.'''
-        pass
+    def lose_condition(self) -> bool:
+        '''In Sudoku a player can not really lose. That is why this method checks is if a Sudoku is still solvable with the current users input. 
+        If it is not, lose_condition will return True. In the beginning after creating a new game that can not happen since the program should 
+        be able to automatically generate new, and always solvable Sudoku.
+        
+        >>> game = Game()
+        >>> game.sudoku = Sudoku(values = [[5, 5, 0, 2, 0, 8, 1, 9, 7], [2, 8, 6, 1, 9, 7, 3, 4, 5], [1, 7, 9, 3, 4, 5, 2, 6, 8], [7, 0, 3, 0, 2, 6, 8, 1, 0], [5, 6, 0, 8, 1, 9, 7, 0, 4], [8, 9, 1, 7, 3, 0, 5, 2, 6], [0, 3, 7, 4, 0, 2, 0, 0, 1], [6, 1, 8, 9, 7, 0, 4, 0, 2], [0, 0, 0, 6, 8, 1, 9, 0, 0]])
+        >>> game.sudoku.solution = []
+        >>> game.lose_condition() 
+        True
+        '''
+        try:
+            self.sudoku.solve()
+        except Exception as e:
+            return str(e) == "Oh no! Seems like this Sudoku is unsolvable :( "
+        return False
 
     def step(self) -> bool:
-        '''One player input in a Sudoku cell, which is in the default Sudoku a number between 1 and 9. 
-        Also the player should have the possibility to erase his own previous inputs. 
+        '''This method is used for a players' step. This can be entering a new value at a specified 
+        coordinate in the sudoku field or getting a hint if the current sudoku field is too 
+        hard, etc. every possible thing a user can do while playing.
+        Note that the self.ui attribute has to be set, even through not necessary already in the games' constructor!
+        
+        >>> game = Game() # doctest: +IGNORE_EXCEPTION_DETAIL
+        >>> game.step()
+        Traceback (most recent call last):
+            ...
+        Exception: To play a game and call step() method you have to set the self.ui attribute!                             
+        This is a programming error and should never happen.
         '''
+        if self.ui is ...: 
+            raise Exception("To play a game and call step() method you have to set the self.ui attribute! \
+                            \nThis is a programming error and should never happen.")
         status = self.ui.choose_input_options_during_game() 
         if status: self.ui.show_current_state()
 
@@ -84,19 +152,53 @@ class Game:
         '''Runs a game session interactively until the win condition is reached and the sudoku is fully solved.
         Note that this method should be called from the user_interface. Previously the player 
         should have gotten a welcome and instructions on how to play.
+        If you want to call the run() function you should always set the ui attribute of the game object first!
+        
+        >>> game = Game() # doctest: +IGNORE_EXCEPTION_DETAIL
+        >>> game.run()
+        Traceback (most recent call last):
+            ...
+        Exception: To play a game and call run() method you have to set the self.ui attribute!                 
+        This is a programming error and should never happen.
         '''
-        self.start_timer()
+        if self.ui is ...:
+            raise Exception("To play a game and call run() method you have to set the self.ui attribute! \
+                \nThis is a programming error and should never happen.")
+        self._start_timer()
         self.ui.show_current_state()
         while not self.is_finished():
             self.step()
+        # If the game was interrupted and started again from a saved file the time needed will be added, otherwise self.time_length is 0
         self.time_length += self.measure_time_needed()
-        self.ui._bye()
         self.finish_game()
         
     def show_prefilled_values(self) -> str:
+        """
+        String representation of game, where all prefilled values, saved in the copy_sudoku attribute of the game are colored grey. 
+        In difference to that, all numbers entered from the user are white, stand out and can be distinguished.
+        
+        >>> game = Game()
+        >>> game.sudoku.values = [[0, 7, 0, 2, 9, 3, 5, 8, 1], [0, 5, 1, 0, 0, 7, 0, 2, 9], [2, 3, 9, 8, 1, 5, 7, 6, 0], [1, 2, 5, 4, 7, 8, 6, 9, 3], [0, 0, 0, 1, 5, 2, 0, 4, 7], [4, 8, 7, 9, 0, 6, 0, 0, 5], [3, 4, 6, 5, 0, 9, 0, 7, 8], [7, 1, 8, 3, 0, 4, 9, 5, 2], [0, 9, 0, 7, 0, 1, 4, 3, 6]]
+        >>> game.copy_sudoku = game.sudoku.values
+        >>> game.show_prefilled_values()
+        ' -  -  -  -  -  -  -  -  - \\n|    \\x1b[90m7\\x1b[0m    | \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m | \\x1b[90m5\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m |\\n|    \\x1b[90m5\\x1b[0m  \\x1b[90m1\\x1b[0m |       \\x1b[90m7\\x1b[0m |    \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m |\\n| \\x1b[90m2\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m9\\x1b[0m | \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m7\\x1b[0m  \\x1b[90m6\\x1b[0m    |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m1\\x1b[0m  \\x1b[90m2\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m6\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m |\\n|         | \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |    \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m |\\n| \\x1b[90m4\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m7\\x1b[0m | \\x1b[90m9\\x1b[0m     \\x1b[90m6\\x1b[0m |       \\x1b[90m5\\x1b[0m |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m3\\x1b[0m  \\x1b[90m4\\x1b[0m  \\x1b[90m6\\x1b[0m | \\x1b[90m5\\x1b[0m     \\x1b[90m9\\x1b[0m |    \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m |\\n| \\x1b[90m7\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m3\\x1b[0m     \\x1b[90m4\\x1b[0m | \\x1b[90m9\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |\\n|    \\x1b[90m9\\x1b[0m    | \\x1b[90m7\\x1b[0m     \\x1b[90m1\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m6\\x1b[0m |\\n'
+        """
         return self.sudoku.__str__(self.copy_sudoku, Colors.GREY)
     
     def show_prefilled_values_with_highlighted_cell(self,x,y,color:Colors) -> str:
+        """
+        String representation of game, where all prefilled values, saved in the copy_sudoku attribute of the game are colored grey. 
+        In difference to that, all numbers entered from the user are white, stand out and can be distinguished.
+        
+        >>> game = Game()
+        >>> game.sudoku.values = [[0, 7, 0, 2, 9, 3, 5, 8, 1], [0, 5, 1, 0, 0, 7, 0, 2, 9], [2, 3, 9, 8, 1, 5, 7, 6, 0], [1, 2, 5, 4, 7, 8, 6, 9, 3], [0, 0, 0, 1, 5, 2, 0, 4, 7], [4, 8, 7, 9, 0, 6, 0, 0, 5], [3, 4, 6, 5, 0, 9, 0, 7, 8], [7, 1, 8, 3, 0, 4, 9, 5, 2], [0, 9, 0, 7, 0, 1, 4, 3, 6]]
+        >>> game.copy_sudoku = game.sudoku.values
+        >>> game.show_prefilled_values_with_highlighted_cell(1,1,Colors.BLINKING)
+        ' -  -  -  -  -  -  -  -  - \\n|    \\x1b[90m7\\x1b[0m    | \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m | \\x1b[90m5\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m |\\n|    \\x1b[90m\\x1b[5m5\\x1b[0m\\x1b[0m  \\x1b[90m1\\x1b[0m |       \\x1b[90m7\\x1b[0m |    \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m |\\n| \\x1b[90m2\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m9\\x1b[0m | \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m7\\x1b[0m  \\x1b[90m6\\x1b[0m    |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m1\\x1b[0m  \\x1b[90m2\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m6\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m |\\n|         | \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |    \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m |\\n| \\x1b[90m4\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m7\\x1b[0m | \\x1b[90m9\\x1b[0m     \\x1b[90m6\\x1b[0m |       \\x1b[90m5\\x1b[0m |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m3\\x1b[0m  \\x1b[90m4\\x1b[0m  \\x1b[90m6\\x1b[0m | \\x1b[90m5\\x1b[0m     \\x1b[90m9\\x1b[0m |    \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m |\\n| \\x1b[90m7\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m3\\x1b[0m     \\x1b[90m4\\x1b[0m | \\x1b[90m9\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |\\n|    \\x1b[90m9\\x1b[0m    | \\x1b[90m7\\x1b[0m     \\x1b[90m1\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m6\\x1b[0m |\\n'
+        >>> game.copy_sudoku[0][0] = 1
+        >>> game.show_prefilled_values_with_highlighted_cell(1,1,Colors.BLINKING)
+        ' -  -  -  -  -  -  -  -  - \\n| \\x1b[90m1\\x1b[0m  \\x1b[90m7\\x1b[0m    | \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m | \\x1b[90m5\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m |\\n|    \\x1b[90m\\x1b[5m5\\x1b[0m\\x1b[0m  \\x1b[90m1\\x1b[0m |       \\x1b[90m7\\x1b[0m |    \\x1b[90m2\\x1b[0m  \\x1b[90m9\\x1b[0m |\\n| \\x1b[90m2\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m9\\x1b[0m | \\x1b[90m8\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m7\\x1b[0m  \\x1b[90m6\\x1b[0m    |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m1\\x1b[0m  \\x1b[90m2\\x1b[0m  \\x1b[90m5\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m6\\x1b[0m  \\x1b[90m9\\x1b[0m  \\x1b[90m3\\x1b[0m |\\n|         | \\x1b[90m1\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |    \\x1b[90m4\\x1b[0m  \\x1b[90m7\\x1b[0m |\\n| \\x1b[90m4\\x1b[0m  \\x1b[90m8\\x1b[0m  \\x1b[90m7\\x1b[0m | \\x1b[90m9\\x1b[0m     \\x1b[90m6\\x1b[0m |       \\x1b[90m5\\x1b[0m |\\n -  -  -  -  -  -  -  -  - \\n| \\x1b[90m3\\x1b[0m  \\x1b[90m4\\x1b[0m  \\x1b[90m6\\x1b[0m | \\x1b[90m5\\x1b[0m     \\x1b[90m9\\x1b[0m |    \\x1b[90m7\\x1b[0m  \\x1b[90m8\\x1b[0m |\\n| \\x1b[90m7\\x1b[0m  \\x1b[90m1\\x1b[0m  \\x1b[90m8\\x1b[0m | \\x1b[90m3\\x1b[0m     \\x1b[90m4\\x1b[0m | \\x1b[90m9\\x1b[0m  \\x1b[90m5\\x1b[0m  \\x1b[90m2\\x1b[0m |\\n|    \\x1b[90m9\\x1b[0m    | \\x1b[90m7\\x1b[0m     \\x1b[90m1\\x1b[0m | \\x1b[90m4\\x1b[0m  \\x1b[90m3\\x1b[0m  \\x1b[90m6\\x1b[0m |\\n'
+        """
         value = self.sudoku.values[x][y]
         copy_value = self.copy_sudoku[x][y]
         if self.copy_sudoku[x][y] == 0:
@@ -212,7 +314,3 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod(verbose=True)
-    """
-    write additional testing code here for things that don't work well as unit tests:
-    """
-    # Anjas TODO Write Docs and Test

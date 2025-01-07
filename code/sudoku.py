@@ -36,6 +36,7 @@ class Sudoku(object):
     def __init__(self, size: int = 9, values: list[list[int]] = ...):
         """Initializes objects of sudoku class with default size of 9 fields as height and width.
         Each field has a grid which is per default 3x3
+        Note that the given size has to be a square number! The smallest possible sizedi is 4.
 
         >>> s = Sudoku(5) # doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
@@ -65,6 +66,10 @@ class Sudoku(object):
                 [x for x in range(1, size + 1)] for i in range(1, size + 1)
             ]
         else:
+            for row in values:
+                if len(row) != self.size:
+                    raise ValueError(
+                        "In Sudoku every row has the same length! The length of one row was not equal to the size attribute")
             self.values = values
 
         self.solution: list[list[int]] = []
@@ -165,11 +170,11 @@ class Sudoku(object):
         for p in sample(range(squares), empties):
             self.values[p // self.size][p % self.size] = 0
 
-    def get_difficulty(self, beginEmptyCellCount:int) -> Difficulty:
+    def get_difficulty(self, beginEmptyCellCount: int) -> Difficulty:
         """ The difficulty a sudoku has won't be saved as parameter. 
         With this method you can still determine it.
         The value beginEmptyCellCount should represent how many cells were empty in the beginning. 
-        
+
         >>> s = Sudoku()
         >>> s.create(difficulty=Difficulty.EASY)
         >>> s.get_difficulty(s._count_empty_cells()) # In the beginning there are no user inputs
@@ -180,11 +185,11 @@ class Sudoku(object):
         >>> s.create(difficulty=Difficulty.HARD)
         >>> s.get_difficulty(s._count_empty_cells()) 
         <Difficulty.HARD: 3>
-        
+
         """
-        if beginEmptyCellCount == self.size **2 * 2 // 4:
+        if beginEmptyCellCount == self.size ** 2 * 2 // 4:
             return Difficulty.MEDIUM
-        elif beginEmptyCellCount == self.size **2 * 3 // 4:
+        elif beginEmptyCellCount == self.size ** 2 * 3 // 4:
             return Difficulty.HARD
         return Difficulty.EASY
 
@@ -576,7 +581,7 @@ class Sudoku(object):
         """Returns a string representation with a blinking cell at the given coordinates. 
         That will be either an actual value or an underscore, depending on if the value is empty in the sudoku field.
 
-        Notice that you might have to execute the program in a separate console because 
+        Note that you might have to execute the program in a separate console because 
         e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
 
         >>> s = Sudoku()
@@ -689,7 +694,7 @@ class Sudoku(object):
         If both highlighted_values and highlighted_color are given, every entry in highlighted_values that is not empty will be printed
         in the given color instead of the originally value entry of the sudoku field.
 
-        Notice that you might have to execute the program in a separate console because 
+        Note that you might have to execute the program in a separate console because 
         e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
 
         >>> s = Sudoku(size=9,values=[[8, 0, 0, 5, 1, 7, 6, 9, 3], [9, 3, 6, 4, 8, 0, 5, 1, 7], [1, 7, 5, 6, 9, 0, 4, 8, 2], [0, 4, 9, 8, 2, 0, 0, 0, 0], [7, 6, 1, 0, 3, 4, 8, 0, 5], [2, 5, 8, 1, 7, 0, 9, 0, 4], [4, 8, 3, 0, 5, 0, 0, 6, 9], [0, 0, 7, 3, 0, 8, 2, 0, 1], [5, 1, 2, 7, 6, 9, 3, 4, 8]])
