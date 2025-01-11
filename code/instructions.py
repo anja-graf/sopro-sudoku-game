@@ -1,14 +1,16 @@
+from sudoku import Difficulty
+
 class Instructions:
      """
      Instructions is a helper class for the user_interface class.
      Because of voluminous explanations and options those are outsourced here.
      """
      
-     def _show_input_options_pre_game():
+     def _show_input_options_pre_game(current_difficulty=Difficulty.EASY):
           # TODO implement input given game
-          print("The following are all the input options before the game:\
+          print(f"The following are all the input options before the game:\
                \n[n]: Start a new sudoku game \
-               \n[d]: Set the difficulty (easy, medium, hard). The default is easy \
+               \n[d]: Set the difficulty (easy, medium, hard). The current difficulty is {Difficulty.string_representation(current_difficulty)} \
                \n[s]: Set size of sudoku. The default is 9 \
                \n[p]: Set player \
                \n[o]: Open game from file \

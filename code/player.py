@@ -14,15 +14,18 @@ class Player:
 
     def __init__(self, name, password=None, password_hash=None):
         self.name = name
+        self.password = password
+        self.password = None
+        self.password_hash = None
         if password != None:
-            self.password_hash = Player.get_password_hash(password)
-        elif password_hash != None:
+            self.password_hash = Player.hash_password(password)
+        if password_hash != None:
             self.password_hash = password_hash
 
     def add_password(self, password):
         """Secures the player with a provided password.
         """
-        self.password_hash = Player.get_password_hash(password)
+        self.password_hash = Player.hash_password(password)
 
     def validate_credentials(self, password) -> bool:
         """Checks the provided password against the password hash of the player.
@@ -33,12 +36,27 @@ class Player:
         if self.password_hash == None:
             return True
 
-        return self.password_hash == Player.get_password_hash(password)
+        return self.password_hash == Player.hash_password(password)
+    
+    def has_password(self) -> bool:
+        """Returns whether the Player has a password
+
+        Returns:
+            bool: Whether the Player has a password
+        """
+        return self.password != None or self.password_hash != None
 
     def to_dict(self) -> dict:
         """Transforms the player data into a dictionary.
         """
-        return {"name": self.name, "password_hash": self.password_hash}
+        return {"name": self.name, "password_hash": self.get_password_hash()}
+    
+    def get_password_hash(self) -> str:
+        if self.password != None and self.password_hash == None:
+            self.password_hash = Player.hash_password(self.password)
+        if self.password_hash != None:
+            return self.password_hash
+        return ""
 
     @staticmethod
     def from_dict(player_dict):
@@ -47,10 +65,10 @@ class Player:
         return Player(name=player_dict["name"], password_hash=player_dict["password_hash"])
 
     @staticmethod
-    def get_password_hash(password) -> str:
+    def hash_password(password) -> str:
         """Transforms the provided password to a sha512 hash value.
         """
-        return hashlib.sha512(password.encode('utf-8')).hexdigest()
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
 if __name__ == '__main__':

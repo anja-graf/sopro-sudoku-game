@@ -89,6 +89,9 @@ class Game:
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''
         # TODO Maybe complete if something is missing here
+        # TODO save game
+        self.ui.save_game_interaction()
+        self.ui.save_highscore(game=self)
         self.ui._bye()
         del self.sudoku
         del self.time_start
@@ -264,6 +267,10 @@ class Game:
         """
         return int(content[len("Needed hints: "):])
 
+    def get_initial_cell_count(self):
+        return Sudoku(
+            size=self.sudoku.size, values=self.copy_sudoku)._count_empty_cells()
+
     def info(self) -> str:
         """
         String Representation of the most identifying features to separate current game object from others.
@@ -278,14 +285,13 @@ class Game:
         >>> "Difficulty.MEDIUM, 4 x 4, Progress: 0/128" in new_game.info() # e.g. Sudoku Game 2025-01-07 11:11:03.646943, Difficulty.EASY, 3 x 3, Progress: 0/20
         True
         """
-        beginEmptyCellCount = Sudoku(
-            size=self.sudoku.size, values=self.copy_sudoku)._count_empty_cells()
-        currentEmptyCellCount = self.sudoku._count_empty_cells()
-        return str(self.name) + ", " + str(self.sudoku.get_difficulty(beginEmptyCellCount)) + ", " +\
+        intial_cell_count = self.get_initial_cell_count()
+        current_empty_cell_count = self.sudoku._count_empty_cells()
+        return str(self.name) + ", " + str(self.sudoku.get_difficulty(intial_cell_count)) + ", " +\
             str(self.sudoku.grid) + " x " + str(self.sudoku.grid) + \
             ", Progress: " + \
-            str(currentEmptyCellCount - beginEmptyCellCount) + \
-            "/" + str(beginEmptyCellCount)
+            str(current_empty_cell_count - intial_cell_count) + \
+            "/" + str(intial_cell_count)
 
     def __str__(self) -> LiteralString | str:
         """
@@ -317,6 +323,16 @@ class Game:
         return "\n\n" + str(self.sudoku) + \
             "\nNeeded time: " + str(self.time_length) + " seconds" + \
             "\nNeeded hints: " + str(self.hint_counter)
+    
+    def get_difficulty(self):
+        return self.sudoku.get_difficulty(self.get_initial_cell_count())
+
+    def get_current_score(self, base_difficulty_value=500, hint_penalty=100):
+        score = base_difficulty_value * Difficulty.int_representation(self.get_difficulty())
+        score -= self.time_length
+        score -= hint_penalty * self.hint_counter
+        score = 0 if score <= 0 else score
+        return score
 
 
 if __name__ == "__main__":

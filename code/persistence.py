@@ -11,7 +11,7 @@ class Persistence:
     """This class controls the saving and loading 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename="user-data.json"):
         """
         speichert json objekte in einer datei und öffnet diese, falls sie schon existiert
 
@@ -24,14 +24,18 @@ class Persistence:
                 self.data = json.load(json_data)
         else:
             self.data = defaultdict(dict)
+        if not "players" in self.data:
+            self.data["players"] = dict()
+        if not "highscores" in self.data:
+            self.data["highscores"] = []
 
-    def get_players(self) -> list[Player]:
-        """Get a list of all players
+    def get_players(self):
+        """Gets a dict of all players.
 
         Returns:
-            list[Player]: List of `Player` instances
+            dict: A dictionary of player names (str) to `Player` instances.
         """
-        return [Player.from_dict(player_dict) for player_dict in self.data["players"]]
+        return {name: Player.from_dict({"name": name, "password_hash": hash}) for name, hash in self.data["players"].items()}
 
     def save_player(self, player: Player):
         """Saves a `Player` instance. Either overrides the player if it already exists, or creates a new one.
@@ -40,45 +44,28 @@ class Persistence:
             player (Player): The player which is to be saved.
         """
         new_player_dict = player.to_dict()
-        replaced = False
-        for i, p in enumerate(self.data["players"]):
-            if p["name"] == player.name:
-                self.data["players"][i] = new_player_dict
-                replaced = True
-                break
+        name = new_player_dict["name"]
+        hash = new_player_dict["password_hash"]
+        self.data["players"][name] = hash
+        self._save_to_json()
 
-        if replaced == False:
-            self.data["players"].append(new_player_dict)
-
-    def get_games_for_player(self, player_name_: str):
-        """Gets all games for a player.
-
-        Args:
-            player_name (str): The players name.
-        """
-        pass
-
-    def get_game(self, player_name, game_name):
-        """Gets a game by player and game name.
-        """
-        pass
-
-    def save_game(game: Game, path:str=""):
+    @staticmethod
+    def save_game(game: Game, path: str=""):
         """Saves a game.
 
         Args:
             game (Game): The game that is to be saved.
         """
-        if game.name is None:
-            game.name = "Sudoku Game " + str(dt.datetime.now())
-        with open(os.path.join(path,game.name),"w") as f:
+        filename = "Sudoku Game " + str(dt.datetime.now()).replace(':','-')
+        with open(os.path.join(path,filename),"w") as f:
             content = "Sudoku Game from " + str(dt.datetime.now())
             if game.player is not None:
                 content += ", played by " + game.player.name    
             content += str(game)
             f.write(content)
     
-    def load_game(path:str) -> Game:
+    @staticmethod
+    def load_game(path: str) -> Game:
         #TODO Tests and Docstring, maybe validation code that checks if anything was manipulated
         with open(path,"r") as f:
             content = list(f)
@@ -92,8 +79,29 @@ class Persistence:
         """
         with open(self.filename, "w") as json_data:
             json.dump(self.data, json_data)
-        pass
-    
+
+    def save_highscore(self, user, game):
+        """ Saves highscore into the highscore file after finishing the game
+        """
+        highscore_dict = {
+            "player": user.name,
+            "score": game.get_current_score(),
+            "difficulty": Difficulty.string_representation(game.get_difficulty()),
+            "hints": game.hint_counter,
+            "time": game.time_length
+        }
+        self.data["highscores"].append(highscore_dict)
+        self._save_to_json()
+
+    def get_highscores(self, n):
+        """Returns a list of the highscores
+        """
+        highscore_list = [(highscore["player"], highscore["score"]) for highscore in self.data["highscores"]]
+        highscore_list = sorted(highscore_list, key=lambda x: x[1])
+        if n < len(highscore_list):
+            highscore_list = highscore_list[:n]
+        return highscore_list
+
     def check_path(path:str) -> bool:
         return os.path.exists(path) and os.path.isdir(path)
     
@@ -102,3 +110,9 @@ class Persistence:
 
     def get_current_dir() -> str:
         return os.getcwd()
+
+    def _save_to_json(self):
+        """Writes all changes of the `data` attribute to the json file.
+        """
+        with open(self.filename, "w") as data_file:
+            json.dump(self.data, data_file, indent=4)
