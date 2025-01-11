@@ -83,8 +83,9 @@ class Persistence:
     def save_highscore(self, user, game):
         """ Saves highscore into the highscore file after finishing the game
         """
+        name = user.name if user is not None else "None"
         highscore_dict = {
-            "player": user.name,
+            "player": name,
             "score": game.get_current_score(),
             "difficulty": Difficulty.string_representation(game.get_difficulty()),
             "hints": game.hint_counter,
