@@ -44,12 +44,11 @@ class UI:
 
     def _bye(self):
         # TODO Animation maybe
-        self.save_game_interaction()
-        self.save_highscore(game=self.game)
         print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +
               " seconds using " + str(self.game.hint_counter) + " hints!")
+        self.persistence.save_highscore(self.player, self.game)
         if input("Do you want to play another sudoku? [y]") != "y":
-            print("Okay, bye!")
+            print("Okay, goodbye! Thanks for playing sudoku!")
             exit()
         self.game = Game(ui=self)
         self.choose_input_options_pre_game()
@@ -86,8 +85,15 @@ class UI:
                 return Instructions.show_rules()
             elif user_input == "h":
                 highscore_list = self.persistence.get_highscores(n=10)
+                print("This is the current highscore list: \
+                    \nPlayer \t\t\t| Score \
+                    \n- - - - - - - - - - - - - - - - - - - - -")
                 for name, score in highscore_list:
-                    print(f"{name}: {score}")
+                    if len(name) < 23:
+                        print(f"{name:23} | {score}")
+                    else:
+                        print(f"{name[0:20]}... | {score}")
+                print("")
             elif user_input == "o":
                 path = self.get_path(file=True)
                 try:
@@ -435,8 +441,6 @@ class UI:
                 return Difficulty.HARD
             print("Please select one of [e, m, h]!")
 
-    def save_highscore(self, game):
-        self.persistence.save_highscore(self.player, game)
 
     def clear():
         # print('\x1b[2J')
