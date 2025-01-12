@@ -300,7 +300,7 @@ class Sudoku(object):
 
         if self.size >= 36:
             raise Exception(
-                "\nHi, it's me your Pc. You are working with such high numbers... \n...that is too strenuous for me! \nFunfact: Already the normal Sudoku field with self.size = 9 has 81! permutations, but a lot of those would not pass my is_valid() method. This is why there are 'only' around 6.67 * 10²¹ possible fields! [https://rp-online.de/panorama/wissen/wie-viele-sudokus-sind-moeglich_aid-17351685]"
+                "\nHi, it's me your Pc. You are working with such high numbers... \n...that is too strenuous for me! \nFunfact: Already the normal Sudoku field with self.size = 9 has 81! permutations, but a lot of those would not pass my is_valid() method. This is why there are 'only' around 6.67 * 10²¹ possible fields! \n[https://rp-online.de/panorama/wissen/wie-viele-sudokus-sind-moeglich_aid-17351685]"
             )
         if self._backtrack_sudoku(0):
             self.solution = self.values

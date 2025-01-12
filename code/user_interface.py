@@ -278,12 +278,12 @@ class UI:
                         time.sleep(0.2)
                     self.game.time_length = None
                     self._bye()
-                    exit()
                 except Exception as e:
-                    print(e)
-                    print(Colors.to_err_str(
-                        "Unfortunately the sudoku is unsolvable! To see all wrong fields press w!"))
-                    exit()
+                    print(Colors.to_err_str(e))
+                    if str(e) == "Oh no! Seems like this Sudoku is unsolvable :( ":
+                        print(Colors.to_err_str("To see all wrong fields press w!"))
+                        continue
+                exit()
             elif user_input == "w":
                 wrong_fields = self.game.sudoku.show_wrong_fields()
                 self.show_current_state(modified=wrong_fields)
