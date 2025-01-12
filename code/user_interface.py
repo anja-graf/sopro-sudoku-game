@@ -70,6 +70,17 @@ class UI:
                 print(self.game.get_current_state())
         else:
             print(modified)
+            
+    def show_highscore_list(highscore_list):
+        print("This is the current highscore list: \
+            \nPlayer \t\t\t| Score \
+            \n- - - - - - - - - - - - - - - - - - - - -")
+        for name, score in highscore_list:
+            if len(name) < 23:
+                print(f"{name:23} | {score}")
+            else:
+                print(f"{name[0:20]}... | {score}")
+        print("")
 
     def show_blinking_input_signal():
         # >>> blinking
@@ -87,19 +98,17 @@ class UI:
                 return Instructions.show_rules()
             elif user_input == "h":
                 highscore_list = self.persistence.get_highscores(n=10)
-                print("This is the current highscore list: \
-                    \nPlayer \t\t\t| Score \
-                    \n- - - - - - - - - - - - - - - - - - - - -")
-                for name, score in highscore_list:
-                    if len(name) < 23:
-                        print(f"{name:23} | {score}")
-                    else:
-                        print(f"{name[0:20]}... | {score}")
-                print("")
+                UI.show_highscore_list(highscore_list)
             elif user_input == "o":
                 path = self.get_path(file=True)
                 try:
-                    self.game = Persistence.load_game(path)
+                    self.game,player_name = self.persistence.load_game(path)
+                    if player_name != None:
+                        print("To open the game you have to log in as " + player_name + "!")
+                        hash = self.input_and_validate_password(player_name)
+                        player = Player(player_name, password_hash=hash)
+                        print(f"Welcome back!")
+                        self.player = player
                     self.game.ui = self
                 except Exception as e:
                     print(Colors.to_err_str(
@@ -168,7 +177,7 @@ class UI:
             if saved_player.validate_credentials(password):
                 print("You are now logged in")
                 return Player.hash_password(password)
-            print("You have typed in the wrong password")
+            print(Colors.to_err_str("You have typed in the wrong password"))
 
     def select_password(self):
         """Prompts the user to select a password.

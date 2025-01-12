@@ -69,6 +69,10 @@ class Sudoku(object):
                 if len(row) != self.size:
                     raise ValueError(
                         "In Sudoku every row has the same length! The length of one row was not equal to the size attribute")
+            if len(values) != self.size: # len(values) is amount of columns
+                raise ValueError(
+                        "A Sudoku is always a square, but here the number of rows was not equal to the number of columns!")
+            
             self.values = values
 
         self.solution: list[list[int]] = []

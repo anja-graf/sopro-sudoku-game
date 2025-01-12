@@ -64,15 +64,24 @@ class Persistence:
             content += str(game)
             f.write(content)
     
-    @staticmethod
-    def load_game(path: str) -> Game:
-        #TODO Tests and Docstring, maybe validation code that checks if anything was manipulated
+    def load_game(self,path: str) -> tuple[Game,str]:
+        """
+        This method loads a game at the given path and returns it as well as
+        the player's name if there can be found one matching 
+        """
         with open(path,"r") as f:
             content = list(f)
-            game = Game.str_to_game(content,os.path.basename(path))
+            try:
+                game = Game.str_to_game(content,os.path.basename(path))
+            except:
+                raise ImportError("The file does not match the right format for importing!")
             if "played by" in content[0]:
-                pass # TODO Player implementation
-        return game
+                player_name = content[0].rstrip().split("played by ")[1] # The players name comes after 'played by'
+                if player_name in self.data["players"]:
+                    return game,player_name
+                else:
+                    raise ImportError("The player of the sudoku game could not be found!")
+        return game,None
 
     def save_to_json(self):
         """Writes all changes of the `data` attribute to the json file.
