@@ -81,8 +81,6 @@ class Game:
 
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''
-        # TODO Maybe complete if something is missing here
-        # TODO save game 
         self.ui._bye()
         del self.sudoku
         del self.time_start

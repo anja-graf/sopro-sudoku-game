@@ -345,10 +345,8 @@ class Sudoku(object):
         row = index // self.size
         col = index % self.size
         if self.values[row][col] == 0:
-            # print(index // self.size,index % self.size)
             for j in range(1, self.size + 1):
                 self.values[row][col] = j
-                # print(self)
                 if self.is_valid() and self._backtrack_sudoku(index + 1):
                     return True
                 self.values[row][col] = 0

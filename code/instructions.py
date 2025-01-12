@@ -5,7 +5,6 @@ class Instructions:
      """
      
      def _show_input_options_pre_game(current_difficulty:str,current_size:int):
-          # TODO implement input given game
           print("The following are all the input options before the game:\
                \n[n]: Start a new sudoku game \
                \n[d]: Set the difficulty (easy, medium, hard). The current difficulty is " + current_difficulty.name + "\

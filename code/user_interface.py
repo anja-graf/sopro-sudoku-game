@@ -38,12 +38,10 @@ class UI:
         self.choose_input_options_pre_game()
 
     def _welcome():
-        # TODO Animation maybe
         UI.clear()
         print("Welcome to Sudoku!")
 
     def _bye(self):
-        # TODO Animation maybe
         if self.game.time_length == None:
             print("Congratulations, you finished the sudoku using " +
                   str(self.game.hint_counter) + " hints!")
@@ -52,12 +50,11 @@ class UI:
                   " seconds using " + str(self.game.hint_counter) + " hints!")
             # Games that were solved while the player could watch should not appear in the high score list!
             self.persistence.save_highscore(self.player, self.game)
-        if input("Do you want to play another sudoku? [y]\nc") != "y":
+        if input("Do you want to play another sudoku? [y]\n") != "y":
             print("Okay, goodbye! Thanks for playing sudoku!")
             exit()
         self.game = Game(ui=self)
         self.choose_input_options_pre_game()
-        # TODO Save current game option
 
     def show_current_state(self, clear: bool = True, modified: str = ...):
         if clear:
@@ -260,11 +257,10 @@ class UI:
                 if wrong_fields == self.game.sudoku.__str__():
                     print(Colors.to_right_str("You have no mistakes so far!"))
                 else:
+                    print("Note that there can be multiple solutions to one sudoku and \nthe w option compares your current sudoku field to only one of them!\n")
                     if input("Do you want to remove all wrong fields? [y]\n") == "y":
                         self.game.sudoku.remove_wrong_fields()
                         return True
-                # TODO remove all wrong fields functionality maybe
-                # TODO print important notes for using
                 return False
             else:
                 print(Colors.to_err_str(
@@ -466,9 +462,6 @@ class UI:
             print("Please select one of [e, m, h]!")
 
     def clear():
-        # print('\x1b[2J')
-        # TODO if we want to have a clearing function like this we have to move it to user_interface class
-
         if name == 'nt':
             system('cls')  # windows
         else:
@@ -478,10 +471,11 @@ class UI:
         keyboard.press_and_release('enter')
         input("Press enter to proceed!\n")
 
-
         # alternative
         # import sys
         # sys.stdout.flush()
+
+
 if __name__ == "__main__":
 
     """
