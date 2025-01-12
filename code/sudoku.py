@@ -62,7 +62,7 @@ class Sudoku(object):
         if values is ...:
             # filling with some values, later the create function should be called to generate a solvable field
             self.values: list[list[int]] = [
-                [x for x in range(1, size + 1)] for i in range(1, size + 1)
+                [0 for x in range(1, size + 1)] for i in range(1, size + 1)
             ]
         else:
             for row in values:
@@ -720,6 +720,8 @@ class Sudoku(object):
         """String representation of a sudoku field as a formatted matrix. All empty cells with 0 will be replaces with spaces.
         If both highlighted_values and highlighted_color are given, every entry in highlighted_values that is not empty will be printed
         in the given color instead of the originally value entry of the sudoku field.
+        Make sure to only call this method if the sudoku is not to big (size should be less than three digits), otherwise the string representation
+        will not fit on the console output!
 
         Note that you might have to execute the program in a separate console because 
         e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking with Colors.BLINKING
@@ -763,7 +765,8 @@ class Sudoku(object):
                         rep += "   "
                     else:
                         # Actual number values of the sudoku field
-                        if len(str(self.values[i][j])) == 1:
+                        if len(str(self.values[i][j])) != 2: 
+                            # If the cell has a two digit number there has to be less space between the numbers so that they all fit better on the console output
                             rep += " " 
                         rep += str(self.values[i][j]) + " "
                 else:

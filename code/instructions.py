@@ -11,6 +11,7 @@ class Instructions:
                \n[s]: Set size of sudoku. The current size is " + str(current_size) +"\
                \n[p]: Set player \
                \n[o]: Open game from file \
+               \n[t]: Type in own game \
                \n[h]: Show all high scores \
                \n[r]: Show rules of sudoku \
                \n-------------------------------------------------------------------------------")

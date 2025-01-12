@@ -115,6 +115,30 @@ class UI:
                         "This file could not be loaded:" + str(e) + "\n\n"))
                     continue
                 self.game.run()
+            elif user_input == "t":
+                self.game = Game(size=size, difficulty=difficulty, ui=self)
+                self.game.sudoku = Sudoku(size=size)
+                self.game.copy_sudoku = Sudoku._deep_copy(self.game.sudoku.values)
+                try:
+                    error = Colors.to_str("Please input the numbers you want to have in your sudoku!",Colors.BLUE)
+                    while True:  # All None as return value means escape
+                        x, y, value = self.get_coordinates_and_values_through_navigating(error)
+                        if x == None or y == None or value == None:
+                            if self.game.sudoku._count_empty_cells() == size **2:
+                                error = Colors.to_str("Wow, that is a very hard sudoku! \nPlease input at least one number you want to have in your sudoku!",Colors.BLUE)
+                                continue
+                            elif not self.game.sudoku.is_valid():
+                                error = Colors.to_err_str("Please input a solvable sudoku!")
+                                continue
+                            else: break
+                        self._set_value(x, y, value)
+                except Exception as e:
+                    print(e)
+                    print(Colors.to_err_str("You might have to execute the program in a separate console because e.g. visual studio codes' console blocks some ansi escape sequences, such as blinking! \
+                        \nAlso, if you have linux operating system you need to execute the program as super user (sudo)\n\n"))
+                    exit()
+                self.game.copy_sudoku = Sudoku._deep_copy(self.game.sudoku.values)
+                self.game.run()
             elif user_input == "p":
                 self.player = self.select_user()
             elif user_input == "s":
@@ -301,16 +325,17 @@ class UI:
             except ValueError as ve:
                 print("Invalid input: " + ve + ". Please try again.")
 
-    def get_coordinates_and_values_through_navigating(self) -> tuple[int | None, int | None, int | None]:
+    def get_coordinates_and_values_through_navigating(self, error:str = '') -> tuple[int | None, int | None, int | None]:
         """
         This method is for navigating through a sudoku field with arrow keys instead of coordinates
+        To print a text like an error after cleaning the console pass it to the 'error' attribute.
         Note that keyboard module needs to be imported first and on some devices, e.g. Linux the execution requires sudo rights!
         """
         # in the middle the distance to all coordinates is minimal
         x = int(self.game.sudoku.size / 2)
         y = x
         value = None
-        ch = error = ''
+        ch = ''
         while ch != 'esc' or not self.game.is_solved():
             if self._prefilled:
                 self.show_current_state(
@@ -322,7 +347,7 @@ class UI:
                     modified=self.game.sudoku.show_blinking_cell(x, y))
             Instructions._show_input_options_during_coordinates_values_input()
             if error != '':
-                print(Colors.to_err_str(error))
+                print(error)
             error = ''
             ch = keyboard.read_key()
             time.sleep(0.2)
@@ -339,7 +364,7 @@ class UI:
                     value = int(ch)
                     UI.flush()
                     return x, y, value
-                error = "Oh no! This field is already prefilled!"
+                error = Colors.to_err_str("Oh no! This field is already prefilled!")
             elif ch == 'u':
                 self._prefilled = not self._prefilled
             elif ch == 'esc' or self.game.is_finished():
@@ -349,7 +374,7 @@ class UI:
                     pass
                 pass
             else:
-                error = "That was no valid input, please try again!"
+                error = Colors.to_err_str("That was no valid input, please try again!")
             if not self.game.sudoku.is_valid_coordinate(x, y):
                 raise Exception("This should never happen!")
         UI.flush()

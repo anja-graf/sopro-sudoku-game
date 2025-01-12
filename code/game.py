@@ -203,7 +203,7 @@ class Game:
         """
         value = self.sudoku.values[x][y]
         copy_value = self.copy_sudoku[x][y]
-        if self.copy_sudoku[x][y] == 0:
+        if self.copy_sudoku[x][y] == 0: # The blinking cell is a user input
             self.sudoku.values[x][y] = Colors.to_str(
                 self.sudoku.values[x][y], color)
         else:
