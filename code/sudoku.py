@@ -771,9 +771,11 @@ class Sudoku(object):
                         rep += str(self.values[i][j]) + " "
                 else:
                     # Colored output of those values of highlighted_values that are not empty
+                    if len(str(self.values[i][j])) != 2: 
+                            # If the cell has a two digit number there has to be less space between the numbers so that they all fit better on the console output
+                            rep += " " 
                     rep += (
-                        " "
-                        + Colors.to_str(str(highlighted_values[i][j]), highlighted_color)
+                        Colors.to_str(str(highlighted_values[i][j]), highlighted_color)
                         + " "
                     )
             rep += "|\n"
