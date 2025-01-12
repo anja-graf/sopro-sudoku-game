@@ -638,9 +638,15 @@ class Sudoku(object):
         """ This method extracts the list of rows from the string representation, 
         which can be used for the values attribute.
 
+        # Test for 9x9 Sudoku
         >>> content = ['| 1  7    | 3       | 9  4    |\\n','|    6    | 9  4  5 | 2  1  7 |\\n','|    5    |    1  7 |    8  6 |\\n',' -  -  -  -  -  -  -  -  - \\n','|    8  5 | 7  2  4 | 6     1 |\\n','| 3     6 | 5  9  8 |    2  4 |\\n','| 2  4  7 | 6  3  1 | 5  9  8 |\\n',' -  -  -  -  -  -  -  -  - \\n','|       8 | 4     9 |         |\\n','| 7  9  4 | 1  6  2 | 8  5  3 |\\n','| 6  2  1 | 8  5  3 | 4  7  9 |\\n']
         >>> Sudoku._str_to_values(content,0,len(content),3)
         [[1, 7, 0, 3, 0, 0, 9, 4, 0], [0, 6, 0, 9, 4, 5, 2, 1, 7], [0, 5, 0, 0, 1, 7, 0, 8, 6], [0, 8, 5, 7, 2, 4, 6, 0, 1], [3, 0, 6, 5, 9, 8, 0, 2, 4], [2, 4, 7, 6, 3, 1, 5, 9, 8], [0, 0, 8, 4, 0, 9, 0, 0, 0], [7, 9, 4, 1, 6, 2, 8, 5, 3], [6, 2, 1, 8, 5, 3, 4, 7, 9]]
+        
+        # Test for 16x16 Sudoku
+        >>> content = ['| 1  5       |12 14  9 16 | 3 13  6    | 2 10 11  7 |\\n', '|    6  4 13 |    1  5  8 |10     7  2 |   14 16    |\\n', '|14  9 12 16 | 2          | 1  8  5 15 | 4    13  6 |\\n', '|10     2    |    3  6    |14 16  9 12 |15  1  8  5 |\\n', ' -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - \\n', '|13        6 |       4  5 |11  7 12 10 |   16  9    |\\n', '|16    14  9 |10    12  7 |    5     1 | 3 13  6  2 |\\n', '| 8  4  1  5 |14 16       |13     2  3 |10     7 12 |\\n', '|11 12 10  7 |       2  6 |16  9 15 14 |    8  5  4 |\\n', ' -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - \\n', '|    1 16 15 |    7    12 | 5  4  3    |13  6  2 10 |\\n', '| 5  3     4 |16  9    15 | 6  2 10    |11  7 12 14 |\\n', '| 7    11    |13    10  2 | 9 15  1    | 8  5  4    |\\n', '| 6 10 13  2 |    5  3  4 | 7    14 11 |    9     1 |\\n', ' -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - \\n', '|         10 | 5  4 13  3 |   14 16  7 |   15  1  8 |\\n', '|    8  9  1 | 7    16 14 | 4  3 13  5 | 6       11 |\\n', '|12     7 14 | 6  2 11 10 |15  1     9 | 5  4       |\\n', '| 4     5  3 | 9 15  8  1 | 2 10 11  6 | 7    14 16 |\\n']
+        >>> Sudoku._str_to_values(content,0,len(content),4)
+        [[1, 5, 0, 0, 12, 14, 9, 16, 3, 13, 6, 0, 2, 10, 11, 7], [0, 6, 4, 13, 0, 1, 5, 8, 10, 0, 7, 2, 0, 14, 16, 0], [14, 9, 12, 16, 2, 0, 0, 0, 1, 8, 5, 15, 4, 0, 13, 6], [10, 0, 2, 0, 0, 3, 6, 0, 14, 16, 9, 12, 15, 1, 8, 5], [13, 0, 0, 6, 0, 0, 4, 5, 11, 7, 12, 10, 0, 16, 9, 0], [16, 0, 14, 9, 10, 0, 12, 7, 0, 5, 0, 1, 3, 13, 6, 2], [8, 4, 1, 5, 14, 16, 0, 0, 13, 0, 2, 3, 10, 0, 7, 12], [11, 12, 10, 7, 0, 0, 2, 6, 16, 9, 15, 14, 0, 8, 5, 4], [0, 1, 16, 15, 0, 7, 0, 12, 5, 4, 3, 0, 13, 6, 2, 10], [5, 3, 0, 4, 16, 9, 0, 15, 6, 2, 10, 0, 11, 7, 12, 14], [7, 0, 11, 0, 13, 0, 10, 2, 9, 15, 1, 0, 8, 5, 4, 0], [6, 10, 13, 2, 0, 5, 3, 4, 7, 0, 14, 11, 0, 9, 0, 1], [0, 0, 0, 10, 5, 4, 13, 3, 0, 14, 16, 7, 0, 15, 1, 8], [0, 8, 9, 1, 7, 0, 16, 14, 4, 3, 13, 5, 6, 0, 0, 11], [12, 0, 7, 14, 6, 2, 11, 10, 15, 1, 0, 9, 5, 4, 0, 0], [4, 0, 5, 3, 9, 15, 8, 1, 2, 10, 11, 6, 7, 0, 14, 16]]
         """
         values = []
         for i in range(start, end):
@@ -653,6 +659,10 @@ class Sudoku(object):
                 if row[j] == "|":  # Skip vertical line of '|'
                     j += 2
                     continue
+                elif row[j].isdigit() and row[j+1].isdigit(): # The number has two digits and the second is the following character
+                    translated_row.append(int(str(row[j]) + str(row[j+1])))
+                elif row[j].isdigit() and row[j-1].isdigit(): # The number has two digits and the fist is the previous character
+                    translated_row.append(int(str(row[j-1]) + str(row[j])))
                 elif row[j].isdigit():  # Number entry in cell of the sudoku field
                     translated_row.append(int(row[j]))
                 elif row[j] == " ":  # Empty cells are represented by zero
@@ -735,7 +745,9 @@ class Sudoku(object):
                         rep += "   "
                     else:
                         # Actual number values of the sudoku field
-                        rep += " " + str(self.values[i][j]) + " "
+                        if len(str(self.values[i][j])) == 1:
+                            rep += " " 
+                        rep += str(self.values[i][j]) + " "
                 else:
                     # Colored output of those values of highlighted_values that are not empty
                     rep += (

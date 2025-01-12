@@ -34,7 +34,6 @@ class UI:
         self.player = None
         self._prefilled = False
         self.persistence = Persistence()
-        self.difficulty = Difficulty.EASY
         UI._welcome()
         self.choose_input_options_pre_game()
 
@@ -77,8 +76,10 @@ class UI:
 
     def choose_input_options_pre_game(self):
         user_input = ""
+        difficulty = Difficulty.EASY
+        size = 9
         while True:
-            Instructions._show_input_options_pre_game(self.difficulty)
+            Instructions._show_input_options_pre_game(difficulty,size)
             user_input = input().strip().lower()
 
             if user_input == "r":
@@ -100,12 +101,11 @@ class UI:
             elif user_input == "p":
                 self.player = self.select_user()
             elif user_input == "s":
-                pass  # TODO set size like
-                # self.game = Game(size=16,ui=self)
-                # self.game.run()
+                size = UI.select_size()
+                self.game = Game(size=size, difficulty=difficulty,ui=self)
             elif user_input == "d":
-                self.difficulty = self.select_difficulty()
-                self.game = Game(ui=self, difficulty=self.difficulty)
+                difficulty = UI.select_difficulty()
+                self.game = Game(size=size, difficulty=difficulty,ui=self)
             elif user_input == "n":
                 self.game.run()
             else:
@@ -399,10 +399,22 @@ class UI:
         print(self.game.sudoku)
 
     def select_size():
-        # TODO
-        user_input = input()
+        """selects the size
 
-    def select_difficulty(self):
+        Returns:
+            Size: Has to be a Square Number
+        """      
+        while True:
+            s = int(input("Type in the size you want to play with!\n").strip())
+            if s > 1 and (s ** 0.5).is_integer():
+                if s < 100: return s
+                print(Colors.to_err_str("This size is too high, because the sudoku output would not fit in the console! \
+                                  \nPlease type in a two digit square number!"))
+            else: 
+                print(Colors.to_err_str("Please type in a positive square number"))
+
+
+    def select_difficulty():
         """selects the difficulty
 
         Returns:

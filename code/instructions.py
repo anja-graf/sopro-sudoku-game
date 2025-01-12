@@ -4,12 +4,12 @@ class Instructions:
      Because of voluminous explanations and options those are outsourced here.
      """
      
-     def _show_input_options_pre_game(current_difficulty):
+     def _show_input_options_pre_game(current_difficulty:str,current_size:int):
           # TODO implement input given game
-          print(f"The following are all the input options before the game:\
+          print("The following are all the input options before the game:\
                \n[n]: Start a new sudoku game \
-               \n[d]: Set the difficulty (easy, medium, hard). The current difficulty is {current_difficulty.name} \
-               \n[s]: Set size of sudoku. The default is 9 \
+               \n[d]: Set the difficulty (easy, medium, hard). The current difficulty is " + current_difficulty.name + "\
+               \n[s]: Set size of sudoku. The current size is " + str(current_size) +"\
                \n[p]: Set player \
                \n[o]: Open game from file \
                \n[h]: Show all high scores \
