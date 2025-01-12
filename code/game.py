@@ -7,7 +7,6 @@
 # Software Assignment                #
 ######################################
 
-from player import Player
 from sudoku import *
 import time
 import datetime as dt
@@ -21,10 +20,10 @@ class Game:
 
     def __init__(self, size: int = 9, difficulty: Difficulty = Difficulty.EASY, ui=...):
         """
-        The init method in the game class will create a new game session and call the constructor in the Sudoku class. 
-        The number of players in Sudoku is always one, therefore the only parameters here will be 
+        The init method in the game class creates a new game session and calls the constructor in the Sudoku class. 
+        The number of players in Sudoku is always one, therefore the only parameters here is 
         the difficulty (easy, medium and difficult) and the size of the Sudoku field (per default 9 with 3x3 grids). 
-        To be able to set a high score we also want to implement a timer that measures the needed time.
+        To be able to set a high score we also have a timer that measures the needed time.
         As already described in Sudoku constructor the given size has to be a square number. The smallest possible size is 4.
 
         >>> game = Game()
@@ -48,7 +47,6 @@ class Game:
         self.sudoku.create(difficulty)
         # A copy is being created to differentiate between generated and values entered from user
         self.copy_sudoku = Sudoku._deep_copy(self.sudoku.values)
-        self.player = None
         self.hint_counter = 0
         self.ui = ui
         self.time_start = None
@@ -79,12 +77,6 @@ class Game:
         2
         """
         return int(time.time() - self.time_start)  # int cast to get seconds
-
-    def set_player(self, player: Player):
-        """Sets a given Player object as the player for the current game session. 
-        An add_player() method that was suggested in the given Game class code is not 
-        applicable in a Sudoku Game since there is only one player."""
-        self.player = player
 
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''

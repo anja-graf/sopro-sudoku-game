@@ -59,8 +59,8 @@ class Persistence:
         filename = "Sudoku Game " + str(dt.datetime.now()).replace(':','-')
         with open(os.path.join(path,filename),"w") as f:
             content = "Sudoku Game from " + str(dt.datetime.now())
-            if game.player is not None:
-                content += ", played by " + game.player.name    
+            if game.ui.player is not None:
+                content += ", played by " + game.ui.player.name    
             content += str(game)
             f.write(content)
     
