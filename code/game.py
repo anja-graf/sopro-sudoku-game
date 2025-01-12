@@ -89,9 +89,7 @@ class Game:
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''
         # TODO Maybe complete if something is missing here
-        # TODO save game
-        self.ui.save_game_interaction()
-        self.ui.save_highscore(game=self)
+        # TODO save game 
         self.ui._bye()
         del self.sudoku
         del self.time_start
@@ -267,9 +265,20 @@ class Game:
         """
         return int(content[len("Needed hints: "):])
 
-    def get_initial_cell_count(self):
-        return Sudoku(
-            size=self.sudoku.size, values=self.copy_sudoku)._count_empty_cells()
+    def _get_initial_empty_cell_count(self) -> int:
+        """
+        Helper method to count all cells in the initial generated value list 'copy_sudoku'
+        that were zero hence empty.
+        Note that the _count_empty_cells() method is tested in the sudoku class.
+        """
+        return Sudoku(size=self.sudoku.size, values=self.copy_sudoku)._count_empty_cells()
+        
+    def _get_current_empty_cell_count(self) -> int:
+        """
+        Helper method to count all cells in the current sudoku field, that are zero hence empty.
+        Note that the _count_empty_cells() method is tested in the sudoku class.
+        """
+        return self.sudoku._count_empty_cells()
 
     def info(self) -> str:
         """
@@ -285,13 +294,13 @@ class Game:
         >>> "Difficulty.MEDIUM, 4 x 4, Progress: 0/128" in new_game.info() # e.g. Sudoku Game 2025-01-07 11:11:03.646943, Difficulty.EASY, 3 x 3, Progress: 0/20
         True
         """
-        intial_cell_count = self.get_initial_cell_count()
-        current_empty_cell_count = self.sudoku._count_empty_cells()
-        return str(self.name) + ", " + str(self.sudoku.get_difficulty(intial_cell_count)) + ", " +\
+        initial_empty_cell_count = self._get_initial_empty_cell_count()
+        current_empty_cell_count = self._get_current_empty_cell_count()
+        return str(self.name) + ", " + str(self.get_difficulty()) + ", " +\
             str(self.sudoku.grid) + " x " + str(self.sudoku.grid) + \
             ", Progress: " + \
-            str(current_empty_cell_count - intial_cell_count) + \
-            "/" + str(intial_cell_count)
+            str(current_empty_cell_count - initial_empty_cell_count) + \
+            "/" + str(initial_empty_cell_count)
 
     def __str__(self) -> LiteralString | str:
         """
@@ -324,16 +333,14 @@ class Game:
             "\nNeeded time: " + str(self.time_length) + " seconds" + \
             "\nNeeded hints: " + str(self.hint_counter)
     
-    def get_difficulty(self):
-        return self.sudoku.get_difficulty(self.get_initial_cell_count())
-
-    def get_current_score(self, base_difficulty_value=500, hint_penalty=100):
-        score = base_difficulty_value * Difficulty.int_representation(self.get_difficulty())
-        score -= self.time_length
-        score -= hint_penalty * self.hint_counter
-        score = 0 if score <= 0 else score
-        return score
-
+    def get_difficulty(self) -> Difficulty:
+        """
+        Helper method to get the difficulty for the current game.
+        Because the difficulty parameter will not be saved neither in game class 
+        nor in sudoku class (not necessary), this has to be determined.
+        Note that the get_difficulty() method is tested in the sudoku class.
+        """
+        return self.sudoku.get_difficulty(self._get_initial_empty_cell_count())
 
 if __name__ == "__main__":
     import doctest

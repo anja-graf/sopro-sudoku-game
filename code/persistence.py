@@ -86,8 +86,8 @@ class Persistence:
         name = user.name if user is not None else "None"
         highscore_dict = {
             "player": name,
-            "score": game.get_current_score(),
-            "difficulty": Difficulty.string_representation(game.get_difficulty()),
+            "score": Persistence._get_score(game),
+            "difficulty": game.get_difficulty().name,
             "hints": game.hint_counter,
             "time": game.time_length
         }
@@ -117,3 +117,10 @@ class Persistence:
         """
         with open(self.filename, "w") as data_file:
             json.dump(self.data, data_file, indent=4)
+        
+    def _get_score(game, base_difficulty_value=500, hint_penalty=100):
+        score = base_difficulty_value * game.get_difficulty().value
+        score -= game.time_length
+        score -= hint_penalty * game.hint_counter
+        score = 0 if score <= 0 else score
+        return score

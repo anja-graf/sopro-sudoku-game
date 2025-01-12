@@ -12,25 +12,6 @@ class Difficulty(Enum):
     MEDIUM = 2
     HARD = 3
 
-    @staticmethod
-    def string_representation(difficulty):
-        if difficulty == Difficulty.EASY:
-            return 'easy'
-        elif difficulty == Difficulty.MEDIUM:
-            return 'medium'
-        elif difficulty == Difficulty.HARD:
-            return 'hard'
-
-    @staticmethod
-    def int_representation(difficulty):
-        if difficulty == Difficulty.EASY:
-            return 1
-        elif difficulty == Difficulty.MEDIUM:
-            return 2
-        elif difficulty == Difficulty.HARD:
-            return 3
-
-
 class Sudoku(object):
     """Represents the players' sudoku field
 

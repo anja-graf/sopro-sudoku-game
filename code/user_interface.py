@@ -45,6 +45,8 @@ class UI:
 
     def _bye(self):
         # TODO Animation maybe
+        self.save_game_interaction()
+        self.save_highscore(game=self.game)
         print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +
               " seconds using " + str(self.game.hint_counter) + " hints!")
         if input("Do you want to play another sudoku? [y]") != "y":
@@ -175,7 +177,7 @@ class UI:
         """
         print("Do you want to add a password?")
         while True:
-            print("[y] : Yes [n] : No")
+            print("[y] : Yes \n[n] : No")
             answer = input().strip().lower()
             if answer == "n":
                 return None
