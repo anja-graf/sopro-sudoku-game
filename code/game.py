@@ -7,6 +7,7 @@
 # Software Assignment                #
 ######################################
 
+from collections.abc import Generator
 from sudoku import *
 import time
 import datetime as dt
@@ -138,6 +139,14 @@ class Game:
         status = self.ui.choose_input_options_during_game()
         if status:
             self.ui.show_current_state()
+
+    def solve(self) -> Generator:
+        """
+        This repeatedly applies the show_and_set_hint() method so the player can watch the sudoku solving itself. 
+        """
+        while not self.sudoku.is_solved():
+            self.hint_counter += 1
+            yield self.sudoku.show_and_set_hint()
 
     def get_current_state(self) -> Sudoku:
         '''Returns the current Sudoku field of the game session.'''

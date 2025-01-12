@@ -44,10 +44,14 @@ class UI:
 
     def _bye(self):
         # TODO Animation maybe
-        print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +
+        if self.game.time_length == None:
+            print("Congratulations, you finished the sudoku using " + str(self.game.hint_counter) + " hints!")
+        else:
+            print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +
               " seconds using " + str(self.game.hint_counter) + " hints!")
-        self.persistence.save_highscore(self.player, self.game)
-        if input("Do you want to play another sudoku? [y]") != "y":
+            # Games that were solved while the player could watch should not appear in the high score list!
+            self.persistence.save_highscore(self.player, self.game) 
+        if input("Do you want to play another sudoku? [y]\nc") != "y":
             print("Okay, goodbye! Thanks for playing sudoku!")
             exit()
         self.game = Game(ui=self)
@@ -231,15 +235,33 @@ class UI:
             elif user_input == "u":
                 self._prefilled = not self._prefilled
                 return True
-            elif user_input == "s":
+            elif user_input == "q":
                 self.save_game_interaction()
                 print("Goodbye, thanks for playing sudoku!")
                 exit()
+            elif user_input == "s":
+                try:
+                    for step in self.game.solve():
+                        UI.clear()
+                        print("Solving current sudoku...")
+                        print(step)
+                        time.sleep(0.2)
+                    self.game.time_length = None
+                    self._bye()
+                    exit()
+                except Exception as e:
+                    print(e)
+                    print(Colors.to_err_str("Unfortunately the sudoku is unsolvable! To see all wrong fields press w!"))
+                    exit()
             elif user_input == "w":
                 wrong_fields = self.game.sudoku.show_wrong_fields()
                 self.show_current_state(modified=wrong_fields)
                 if wrong_fields == self.game.sudoku.__str__():
                     print(Colors.to_right_str("You have no mistakes so far!"))
+                else:
+                    if input("Do you want to remove all wrong fields? [y]\n") == "y":
+                        self.game.sudoku.remove_wrong_fields()
+                        return True
                 # TODO remove all wrong fields functionality maybe
                 # TODO print important notes for using
                 return False
@@ -282,7 +304,7 @@ class UI:
         y = x
         value = None
         ch = error = ''
-        while ch != 'esc':
+        while ch != 'esc' or not self.game.is_solved():
             if self._prefilled:
                 self.show_current_state(
                     modified=self.game.show_prefilled_values_with_highlighted_cell(x, y, Colors.BLINKING))
@@ -313,7 +335,7 @@ class UI:
                 error = "Oh no! This field is already prefilled!"
             elif ch == 'u':
                 self._prefilled = not self._prefilled
-            elif ch == 'esc':
+            elif ch == 'esc' or self.game.is_finished():
                 break
             elif ch == 'enter':
                 while keyboard.is_pressed("enter"):

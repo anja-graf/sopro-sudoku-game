@@ -23,7 +23,8 @@ class Instructions:
                \n[c]: Type in new value at specified coordinates \
                \n[u]: Show/Hide all user inputs until now\
                \n[w]: Show wrong fields \
-               \n[s]: Save the game and quit \
+               \n[s]: Solve rest of sudoku \
+               \n[q]: Save the game and quit \
                \n-------------------------------------------------------------------------------")
 
      def _show_input_options_during_coordinates_values_input():
