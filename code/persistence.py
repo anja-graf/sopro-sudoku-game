@@ -56,8 +56,9 @@ class Persistence:
         Args:
             game (Game): The game that is to be saved.
         """
-        filename = "Sudoku Game " + str(dt.datetime.now()).replace(':','-')
-        with open(os.path.join(path,filename),"w") as f:
+        if game.name is None:
+            game.name = "Sudoku Game " + str(dt.datetime.now())
+        with open(os.path.join(path,game.name),"w") as f:
             content = "Sudoku Game from " + str(dt.datetime.now())
             if game.ui.player is not None:
                 content += ", played by " + game.ui.player.name    
@@ -127,7 +128,7 @@ class Persistence:
         with open(self.filename, "w") as data_file:
             json.dump(self.data, data_file, indent=4)
         
-    def _get_score(game, base_difficulty_value=500, hint_penalty=100):
+    def _get_score(game, base_difficulty_value=500, hint_penalty=10):
         score = base_difficulty_value * game.get_difficulty().value
         score -= game.time_length
         score -= hint_penalty * game.hint_counter

@@ -82,8 +82,8 @@ class Game:
     def finish_game(self):
         ''' Cleans-up code after a game session ends.'''
         self.ui._bye()
+        # If another sudoku is played directly afterwards this helps cleaning previous one 
         del self.sudoku
-        del self.time_start
         del self.copy_sudoku
 
     def is_finished(self) -> bool:
@@ -280,6 +280,15 @@ class Game:
         """
         return self.sudoku._count_empty_cells()
 
+    def get_difficulty(self) -> Difficulty:
+        """
+        Helper method to get the difficulty for the current game.
+        Because the difficulty parameter will not be saved neither in game class 
+        nor in sudoku class (not necessary), this has to be determined.
+        Note that the get_difficulty() method is tested in the sudoku class.
+        """
+        return self.sudoku.get_difficulty(self._get_initial_empty_cell_count())
+
     def info(self) -> str:
         """
         String Representation of the most identifying features to separate current game object from others.
@@ -332,15 +341,6 @@ class Game:
         return "\n\n" + str(self.sudoku) + \
             "\nNeeded time: " + str(self.time_length) + " seconds" + \
             "\nNeeded hints: " + str(self.hint_counter)
-    
-    def get_difficulty(self) -> Difficulty:
-        """
-        Helper method to get the difficulty for the current game.
-        Because the difficulty parameter will not be saved neither in game class 
-        nor in sudoku class (not necessary), this has to be determined.
-        Note that the get_difficulty() method is tested in the sudoku class.
-        """
-        return self.sudoku.get_difficulty(self._get_initial_empty_cell_count())
 
 if __name__ == "__main__":
     import doctest

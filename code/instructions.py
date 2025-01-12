@@ -4,12 +4,12 @@ class Instructions:
      Because of voluminous explanations and options those are outsourced here.
      """
      
-     def _show_input_options_pre_game(current_difficulty:str,current_size:int):
+     def _show_input_options_pre_game(current_difficulty:str, current_size:int, name:str):
           print("The following are all the input options before the game:\
                \n[n]: Start a new sudoku game \
                \n[d]: Set the difficulty (easy, medium, hard). The current difficulty is " + current_difficulty.name + "\
                \n[s]: Set size of sudoku. The current size is " + str(current_size) +"\
-               \n[p]: Set player \
+               \n[p]: Set player. The current player is " + str(name) + " \
                \n[o]: Open game from file \
                \n[t]: Type in own game \
                \n[h]: Show all high scores \
@@ -46,4 +46,4 @@ class Instructions:
                \n- Column Rule: Each column must also contain all the numbers from 1 to 9 without repetition. \
                \n- Subgrid Rule: Each of the nine 3x3 subgrids must contain all the numbers from 1 to 9 without repetition. \
                \nThe puzzle starts with some numbers already filled in, and the goal is to complete the grid while adhering to these rules.")
-          input("Press enter to proceed!\n")
+          input("\nPress enter to proceed!\n")

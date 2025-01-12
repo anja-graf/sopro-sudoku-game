@@ -34,14 +34,21 @@ class UI:
         self.player = None
         self._prefilled = False
         self.persistence = Persistence()
-        UI._welcome()
         self.choose_input_options_pre_game()
 
     def _welcome():
+        """
+        This is a helper method for starting the UI. It greets the player and cleans the console.
+        """
         UI.clear()
         print("Welcome to Sudoku!")
 
     def _bye(self):
+        """
+        This is a helper method for ending a game. From here, the player can also start another sudoku.
+        If the player didn't finish the game by himself but instead watched it solve itself, 
+        the game will not be saved in highscores. 
+        """
         if self.game.time_length == None:
             print("Congratulations, you finished the sudoku using " +
                   str(self.game.hint_counter) + " hints!")
@@ -57,6 +64,10 @@ class UI:
         self.choose_input_options_pre_game()
 
     def show_current_state(self, clear: bool = True, modified: str = ...):
+        """
+        This prints out the current state of the game and cleans the console if clear is not set to False.
+        To print not the default string representation of the game, modified should be set to the wanted string
+        """
         if clear:
             UI.clear()
         print("This is the current game state:")
@@ -71,7 +82,12 @@ class UI:
         else:
             print(modified)
             
-    def show_highscore_list(highscore_list):
+    def _show_highscore_list(highscore_list):
+        """
+        This is a helper method for showing the given highscore list in a table pattern like following:
+        Player                  | Score             
+        - - - - - - - - - - - - - - - - - - - - -
+        """
         print("This is the current highscore list: \
             \nPlayer \t\t\t| Score \
             \n- - - - - - - - - - - - - - - - - - - - -")
@@ -80,25 +96,32 @@ class UI:
                 print(f"{name:23} | {score}")
             else:
                 print(f"{name[0:20]}... | {score}")
-        print("")
-
-    def show_blinking_input_signal():
-        # >>> blinking
-        pass
+        input("\nPress enter to proceed!\n")
 
     def choose_input_options_pre_game(self):
-        user_input = ""
+        """
+        This method gets the players' choice of what to do before the game has started.
+        E.g. the player can load games or change difficulty/size of a sudoku"""
+        user_input = wrong_user_input = ""
+        name = "not set"
         difficulty = Difficulty.EASY
         size = 9
         while True:
-            Instructions._show_input_options_pre_game(difficulty, size)
+            if self.player != None:
+                name = self.player.name
+            UI.clear()
+            UI._welcome()
+            Instructions._show_input_options_pre_game(difficulty, size, name)
+            if wrong_user_input != "":
+                print(wrong_user_input)
+                wrong_user_input = ""
             user_input = input().strip().lower()
 
             if user_input == "r":
-                return Instructions.show_rules()
+                Instructions.show_rules()
             elif user_input == "h":
                 highscore_list = self.persistence.get_highscores(n=10)
-                UI.show_highscore_list(highscore_list)
+                UI._show_highscore_list(highscore_list)
             elif user_input == "o":
                 path = self.get_path(file=True)
                 try:
@@ -120,7 +143,7 @@ class UI:
                 self.game.sudoku = Sudoku(size=size)
                 self.game.copy_sudoku = Sudoku._deep_copy(self.game.sudoku.values)
                 try:
-                    error = Colors.to_str("Please input the numbers you want to have in your sudoku!",Colors.BLUE)
+                    error = '' # Colors.to_str("Please input the numbers you want to have in your sudoku!",Colors.BLUE)
                     while True:  # All None as return value means escape
                         x, y, value = self.get_coordinates_and_values_through_navigating(error)
                         if x == None or y == None or value == None:
@@ -150,8 +173,8 @@ class UI:
             elif user_input == "n":
                 self.game.run()
             else:
-                print(Colors.to_err_str(
-                    "That was no valid input, please try again!"))
+                wrong_user_input = Colors.to_err_str(
+                    "That was no valid input, please try again!")
 
     def select_user(self):
         """Selects an existing user or creates a new one.
@@ -171,7 +194,7 @@ class UI:
             # print(f"Welcome back! You have played: {games_played} games.")
             print(f"Welcome back!")
         else:
-            password = self.select_password()
+            password = self.input_password()
             player = Player(player_name, password=password)
             self.persistence.save_player(player)
             print(f"New player created: {player.name}")
@@ -203,7 +226,7 @@ class UI:
                 return Player.hash_password(password)
             print(Colors.to_err_str("You have typed in the wrong password"))
 
-    def select_password(self):
+    def input_password(self):
         """Prompts the user to select a password.
 
         This method asks the user if they want to set a password, and if so,
@@ -229,6 +252,10 @@ class UI:
                 return s
 
     def choose_input_options_during_game(self) -> bool:
+        """
+        This method gets the players' choice of what to do while the game is running.
+        E.g. the player can enter new values to the current sudoku, get a hint or save the current game
+        """
         user_input = ""
         while True:
             if user_input == "":  # There has been no error
@@ -242,15 +269,17 @@ class UI:
                     self.show_current_state(
                         modified=self.game.sudoku.show_and_set_hint())
                     self.game.hint_counter += 1
+                    print(Colors.to_str("Note that the cyan colored number is the hint", Colors.CYAN))
                 except Exception:
                     self.show_current_state()
                     print(Colors.to_err_str(
-                        "This option should only be used if the sudoku field is solvable. Try out w!"))
+                        "This option should only be used if the sudoku field is solvable and not to big. Try out w!"))
                 return False
             elif user_input == "c":
-                # alternative:
+                # alternative, but inconvenient:
                 # x, y = self.get_coordinates()
                 # value = self.get_value()
+                # self._set_value(x,y,value)
                 try:
                     while True:  # All None as return value means escape
                         x, y, value = self.get_coordinates_and_values_through_navigating()
@@ -266,7 +295,7 @@ class UI:
                 self._prefilled = not self._prefilled
                 return True
             elif user_input == "q":
-                self.save_game_interaction()
+                self._save_game()
                 print("Goodbye, thanks for playing sudoku!")
                 exit()
             elif user_input == "s":
@@ -299,15 +328,26 @@ class UI:
                 print(Colors.to_err_str(
                     "That was no valid input, please try again!"))
 
-    def save_game_interaction(self):
-        name, path = self.get_filename_and_path()
+    def _save_game(self):
+        """
+        This is a helper method to save the current game. 
+        It calls _get_filename_and_path(), which asks the user for a name of the file and 
+        where the game should be stored at and starts the process by calling Persistence.save_game() method.
+        """
+        name, path = self._get_filename_and_path()
         self.game.name = name
         self.game.time_length += self.game.measure_time_needed()
         Persistence.save_game(self.game, path)
-        print("The game [" + name +
+        print("The game [" + self.game.info() +
               "] was successfully saved at [" + path + "].")
 
     def get_coordinates(self) -> tuple[int, int]:
+        """
+        This method gets coordinates from the player in the format (x,y).
+        
+        Note that this method is currently not used, because it is inconvenient in comparison 
+        to get_coordinates_and_values_through_navigating().
+        """
         is_valid = False
         while not is_valid:
             try:
@@ -380,10 +420,10 @@ class UI:
         UI.flush()
         return None, None, None
 
-    def get_filename_and_path(self) -> tuple[str, str]:
+    def _get_filename_and_path(self) -> tuple[str, str]:
         """
-        This method asks the user if it wants to change the filename or path and in that
-        case gets the new name. 
+        This method asks the user if it wants to change a default filename or path and in that
+        case gets the new name or path. 
         """
         user_input = ""
         path = Persistence.get_current_dir()
@@ -399,7 +439,7 @@ class UI:
 
     def get_path(self, file: bool = False) -> str:
         """
-        This is a helper method to get_filename_and_path(). It gets a filepath from
+        This is a helper method to _get_filename_and_path(). It gets a filepath from
         the users' input and also checks if it is a valid path.
         If file parameter is set to True, the method checks if it is a valid filepath
         (this excludes e.g. directories), which is important for loading a file.
@@ -419,6 +459,12 @@ class UI:
                 print(Colors.to_err_str("The path is invalid!"))
 
     def get_value(self) -> int:
+        """
+        This method gets a value from the player.
+        
+        Note that this method is currently not used, because it is inconvenient in comparison 
+        to get_coordinates_and_values_through_navigating().
+        """
         is_valid = False
         while not is_valid:
             try:
@@ -434,6 +480,14 @@ class UI:
         return value
 
     def _set_value(self, x, y, value) -> bool:
+        """
+        This is a helper method to set a new value 'value' at '(x,y)' coordinates in the current sudoku. 
+        It checks if the new value violates the sudoku rules and asks for confirmation of the user if it does.
+        Nevertheless, the user can still choose to input the wrong value 
+        (for example, the other value causing the violation could be the actual wrong one).
+        
+        Also the user can revoke his input. Then the state of the game remains like before.
+        """
         pre_value = self.game.sudoku.values[x][y]
         self.game.sudoku.set(x, y, value)
         UI.clear()
@@ -455,24 +509,24 @@ class UI:
         print("The value was set successfully!")
         return True
 
-    def display(self):
-        print(self.game.sudoku)
-
     def select_size():
         """selects the size
 
         Returns:
-            Size: Has to be a Square Number
+            Size: Has to be a Square Number and should be smaller than 100
         """
         while True:
-            s = int(input("Type in the size you want to play with!\n").strip())
-            if s > 1 and (s ** 0.5).is_integer():
-                if s < 100:
-                    return s
-                print(Colors.to_err_str("This size is too high, because the sudoku output would not fit in the console! \
-                                  \nPlease type in a two digit square number!"))
-            else:
-                print(Colors.to_err_str("Please type in a positive square number"))
+            try:
+                s = int(input("Type in the size you want to play with!\n").strip())
+                if s > 1 and (s ** 0.5).is_integer():
+                    if s < 100:
+                        return s
+                    print(Colors.to_err_str("This size is too high, because the sudoku output would not fit in the console! \
+                                    \nPlease type in a two digit square number!"))
+                else:
+                    print(Colors.to_err_str("Please type in a positive square number!"))
+            except:
+                print(Colors.to_err_str("This was not a number!\nPlease type in a positive square number!"))
 
     def select_difficulty():
         """selects the difficulty
@@ -496,23 +550,26 @@ class UI:
             print("Please select one of [e, m, h]!")
 
     def clear():
+        """
+        This method clears the console.
+        """
         if name == 'nt':
             system('cls')  # windows
         else:
             system('clear')  # mac and linux, 'posix'
 
     def flush():
-        keyboard.press_and_release('enter')
-        input("Press enter to proceed!\n")
-
+        """
+        This method flushes the input buffer.
+        """
         # alternative
         # import sys
         # sys.stdout.flush()
+        
+        keyboard.press_and_release('enter')
+        input("Press enter to proceed!\n")
 
 
 if __name__ == "__main__":
-
-    """
-    write additional testing code here for things that don't work well as unit tests:
-    """
+    
     ui = UI()
