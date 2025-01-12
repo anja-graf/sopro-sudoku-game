@@ -235,6 +235,7 @@ class Game:
         game = Game()
         game.name = name
         game.sudoku = Sudoku.str_to_sudoku(content)
+        game.copy_sudoku = Sudoku._deep_copy(game.sudoku.values)
         game.time_length = Game._decode_time(content[len(content) - 2])
         game.hint_counter = Game._decode_hints(content[len(content) - 1])
         return game

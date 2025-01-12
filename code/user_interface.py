@@ -104,7 +104,7 @@ class UI:
                 try:
                     self.game,player_name = self.persistence.load_game(path)
                     if player_name != None:
-                        print("To open the game you have to log in as " + player_name + "!")
+                        print("\nTo open the game \n[" + self.game.info() +"] \nyou have to log in as '" + player_name + "'!\n")
                         hash = self.input_and_validate_password(player_name)
                         player = Player(player_name, password_hash=hash)
                         print(f"Welcome back!")
