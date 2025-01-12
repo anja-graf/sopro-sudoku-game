@@ -15,12 +15,13 @@ class Player:
     def __init__(self, name, password=None, password_hash=None):
         self.name = name
         self.password = password
-        self.password = None
-        self.password_hash = None
-        if password != None:
+        self.password_hash = password_hash
+        if self.password_hash is not None and self.password_hash.strip() == "":
+            self.password_hash = None
+        if self.password != None:
             self.password_hash = Player.hash_password(password)
-        if password_hash != None:
-            self.password_hash = password_hash
+        if self.password_hash != None:
+            self.password_hash = self.password_hash
 
     def add_password(self, password):
         """Secures the player with a provided password.
