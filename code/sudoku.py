@@ -633,6 +633,22 @@ class Sudoku(object):
                     value_row.append(0)
             wrong_fields.append(value_row)
         return wrong_fields
+    
+    def remove_wrong_fields(self):
+        """Compares current values to one possible solution and sets every different value to zero.
+
+        >>> s = Sudoku()
+        >>> s.create(difficulty=Difficulty.EASY)
+        >>> s.values[0][0] = 5
+        >>> s.values[0][1] = 5
+        >>> s.remove_wrong_fields()
+        >>> s.values[0][0] == 0 or s.values[0][1] == 0
+        True
+        """
+        for row in range(0, self.size):
+            for col in range(0, self.size):
+                if self.values[row][col] != self.solution[row][col]:
+                    self.values[row][col] = 0
 
     def _str_to_values(content: list[str], start: int, end: int, grid: int) -> list[list[int]]:
         """ This method extracts the list of rows from the string representation, 
