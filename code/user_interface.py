@@ -45,12 +45,13 @@ class UI:
     def _bye(self):
         # TODO Animation maybe
         if self.game.time_length == None:
-            print("Congratulations, you finished the sudoku using " + str(self.game.hint_counter) + " hints!")
+            print("Congratulations, you finished the sudoku using " +
+                  str(self.game.hint_counter) + " hints!")
         else:
             print("Congratulations, you finished the sudoku within " + str(self.game.time_length) +
-              " seconds using " + str(self.game.hint_counter) + " hints!")
+                  " seconds using " + str(self.game.hint_counter) + " hints!")
             # Games that were solved while the player could watch should not appear in the high score list!
-            self.persistence.save_highscore(self.player, self.game) 
+            self.persistence.save_highscore(self.player, self.game)
         if input("Do you want to play another sudoku? [y]\nc") != "y":
             print("Okay, goodbye! Thanks for playing sudoku!")
             exit()
@@ -82,7 +83,7 @@ class UI:
         difficulty = Difficulty.EASY
         size = 9
         while True:
-            Instructions._show_input_options_pre_game(difficulty,size)
+            Instructions._show_input_options_pre_game(difficulty, size)
             user_input = input().strip().lower()
 
             if user_input == "r":
@@ -112,16 +113,16 @@ class UI:
                 self.player = self.select_user()
             elif user_input == "s":
                 size = UI.select_size()
-                self.game = Game(size=size, difficulty=difficulty,ui=self)
+                self.game = Game(size=size, difficulty=difficulty, ui=self)
             elif user_input == "d":
                 difficulty = UI.select_difficulty()
-                self.game = Game(size=size, difficulty=difficulty,ui=self)
+                self.game = Game(size=size, difficulty=difficulty, ui=self)
             elif user_input == "n":
                 self.game.run()
             else:
                 print(Colors.to_err_str(
                     "That was no valid input, please try again!"))
-                
+
     def select_user(self):
         """Selects an existing user or creates a new one.
 
@@ -136,16 +137,15 @@ class UI:
         if player_name in self.persistence.data["players"]:
             hash = self.input_and_validate_password(player_name)
             player = Player(player_name, password_hash=hash)
-            #games_played = len(self.persistence.get_games_for_player(player_name))
-            #print(f"Welcome back! You have played: {games_played} games.")
+            # games_played = len(self.persistence.get_games_for_player(player_name))
+            # print(f"Welcome back! You have played: {games_played} games.")
             print(f"Welcome back!")
         else:
             password = self.select_password()
             player = Player(player_name, password=password)
             self.persistence.save_player(player)
-            print(f"New player created: {player}")
-        return player            
-
+            print(f"New player created: {player.name}")
+        return player
 
     def input_and_validate_password(self, name):
         """
@@ -166,12 +166,12 @@ class UI:
         if not saved_player.has_password():
             return None
         while True:
-                print("Please type in your Password")
-                password = input()
-                if saved_player.validate_credentials(password):
-                    print("You are now logged in")
-                    return Player.hash_password(password)
-                print("You have typed in the wrong password")
+            print("Please type in your Password")
+            password = input()
+            if saved_player.validate_credentials(password):
+                print("You are now logged in")
+                return Player.hash_password(password)
+            print("You have typed in the wrong password")
 
     def select_password(self):
         """Prompts the user to select a password.
@@ -187,7 +187,7 @@ class UI:
         """
         print("Do you want to add a password?")
         while True:
-            print("[y] : Yes \n[n] : No")
+            print("[y]: Yes \n[n]: No")
             answer = input().strip().lower()
             if answer == "n":
                 return None
@@ -251,7 +251,8 @@ class UI:
                     exit()
                 except Exception as e:
                     print(e)
-                    print(Colors.to_err_str("Unfortunately the sudoku is unsolvable! To see all wrong fields press w!"))
+                    print(Colors.to_err_str(
+                        "Unfortunately the sudoku is unsolvable! To see all wrong fields press w!"))
                     exit()
             elif user_input == "w":
                 wrong_fields = self.game.sudoku.show_wrong_fields()
@@ -274,7 +275,8 @@ class UI:
         self.game.name = name
         self.game.time_length += self.game.measure_time_needed()
         Persistence.save_game(self.game, path)
-        print("The game [" + name + "] was successfully saved at [" + path + "].")
+        print("The game [" + name +
+              "] was successfully saved at [" + path + "].")
 
     def get_coordinates(self) -> tuple[int, int]:
         is_valid = False
@@ -431,16 +433,16 @@ class UI:
 
         Returns:
             Size: Has to be a Square Number
-        """      
+        """
         while True:
             s = int(input("Type in the size you want to play with!\n").strip())
             if s > 1 and (s ** 0.5).is_integer():
-                if s < 100: return s
+                if s < 100:
+                    return s
                 print(Colors.to_err_str("This size is too high, because the sudoku output would not fit in the console! \
                                   \nPlease type in a two digit square number!"))
-            else: 
+            else:
                 print(Colors.to_err_str("Please type in a positive square number"))
-
 
     def select_difficulty():
         """selects the difficulty
@@ -462,7 +464,6 @@ class UI:
             elif s == "h":
                 return Difficulty.HARD
             print("Please select one of [e, m, h]!")
-
 
     def clear():
         # print('\x1b[2J')
