@@ -363,7 +363,7 @@ class UI:
         user_input = ""
         path = Persistence.get_current_dir()
         name = self.game.name
-        while user_input != "s":
+        while user_input != "q":
             Instructions._show_input_options_save_game(name, path)
             user_input = input().strip().lower()
             if user_input == "f":

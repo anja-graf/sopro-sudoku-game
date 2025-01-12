@@ -34,7 +34,7 @@ class Instructions:
                \n-------------------------------------------------------------------------------")
 
      def _show_input_options_save_game(name: str, path: str):
-          print("[s]: Save the game and quit \
+          print("[q]: Save the game and quit \
                \n[f]: Change the current filename [" + str(name) + "] \
                \n[p]: Change the current filepath [" + str(path) + "] \
                \n-------------------------------------------------------------------------------")
